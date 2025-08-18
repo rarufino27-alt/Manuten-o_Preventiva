@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RF Drive Control</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0fff0; margin: 0; padding: 0; }
+    header { background-color: #006400; color: white; padding: 20px; text-align: center; }
+    h1 { margin: 0; }
+    main { padding: 20px; }
+    section { margin-bottom: 40px; }
+    label, select, input[type="number"], input[type="text"] { margin-right: 10px; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #999; padding: 8px; text-align: center; }
+    th { background-color: #c5e1a5; }
+    .summary-card { background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+    .btn { background-color: #388e3c; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background-color: #2e7d32; }
+    .card-title { font-weight: bold; margin-bottom: 5px; }
+    .flex { display: flex; gap: 10px; flex-wrap: wrap; }
+    .whatsapp-btn { background-color: #25d366; color: white; padding: 10px 20px; text-align: center; display: inline-block; border-radius: 5px; text-decoration: none; margin-top: 15px; }
+    .manutencao-table input[type="number"] { width: 100px; }
+    .manutencao-table td.readonly { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RF Drive Control - Manutenção Preventiva</h1>
+  </header>
+  <main>
+    <section>
+      <h2>⚙️ Configurações Iniciais</h2>
+      <label for="marca">Marca:</label>
+      <select id="marca" onchange="atualizarModelos()"></select>
+
+      <label for="modelo">Modelo:</label>
+      <select id="modelo"></select>
+
+      <label for="ano">Ano:</label>
+      <select id="ano"></select>
+    </section>
+
+    <section>
+      <h2>⚖️ Tabela de Manutenção Preventiva</h2>
+      <table class="manutencao-table" id="tabelaManutencao">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>KM de Autonomia</th>
+            <th>Último KM de troca</th>
+            <th>Valor pago (R$)</th>
+            <th>KM previsto para nova troca</th>
+            <th>Custo por KM (R$)</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" style="text-align:right;font-weight:bold;">Total de custo por KM:</td>
+            <td id="custoTotalKm">R$ 0.00000</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const marcasModelos = {
+      FIAT: ["Argo 1.0 3 cilindros", "Argo 1.3", "Cronos 1.0 3 cilindros", "Cronos 1.3", "Cronos", "Doblô 1.4", "Doblô 1.8", "Mobi 1.0 3 cilindros", "Mobi 1.0 4 cilindros", "Pálio celebration", "Pálio attractive", "Pálio sporting 1.8", "Pálio EL", "Pálio 1.4", "Pálio 1.6", "Pálio weekend 1.4", "Pálio weekend 1.8", "Punto 1.0", "Punto 1.4", "Punto 1.6", "Punto 1.8", "Siena celebration", "Siena EL 1.0", "Siena EL 1.4", "Siena ELX 1.0", "Siena ELX 1.4", "Siena ELX 1.8", "Siena 1.6", "Uno 1.0 3 cilindros", "Uno 1.0", "Uno 1.4"],
+      CHEVROLET: ["Agile 1.0", "Agile 1.4", "Classic", "Corsa 1.0", "Corsa 1.4", "Corsa 1.8", "Cobalt 1.4", "Cobalt 1.8", "Spin 1.8", "Prisma 1.0", "Prisma 1.4", "Onix 1.0", "Onix 1.4", "Onix joy", "Onix Plus joy", "Onix hatch 3 cilindros", "Onix Plus 3 cilindros"],
+      VOLKSWAGEN: ["Gol 3 cilindros", "Gol 1.0", "Gol 1.6", "Fox 3 cilindros", "Fox 1.0", "Fox 1.6", "Spacefox 1.6", "CrossFox 3 cilindros", "CrossFox 1.0", "CrossFox 1.6", "Space cross", "Voyage 3 cilindros", "Voyage", "Voyage 1.6", "Up 3 cilindros", "Up 1.0", "Up 1.6"],
+      FORD: ["Ecosport 1.6", "Ecosport 2.0", "Fiesta 1.0", "Fiesta 1.6", "Focus hatch 1.6", "Focus hatch 2.0", "Focus sedan 1.6", "Focus sedan 2.0", "New fiesta 1.0", "New fiesta 1.6", "New fiesta sedan 1.6", "Ford Ka 3 cilindros", "Ford Ka 1.0", "Ford Ka 1.5", "Ka+ 3 cilindros", "Ka+ 1.0", "Ka+ 1.5"],
+      HONDA: ["Fit 1.5", "Fit 1.6", "Civic 1.6", "Civic 2.0", "City 1.6", "City 1.7"],
+      HYUNDAI: ["HB20 3 cilindros", "HB20 hatch 1.0", "HB20 hatch 1.6", "HB20S 3 cilindros", "HB20S 1.0", "HB20S 1.6", "Creta 1.0 turbo", "Creta 1.6", "Creta 2.0", "Tucson 1.6", "Tucson 2.0"],
+      RENAULT: ["Kwid 3 cilindros", "Symbol 1.0", "Symbol 1.6", "Sandero 3 cilindros", "Sandero 1.0", "Sandero 1.6", "Logan 3 cilindros", "Logan 1.0", "Logan 1.6", "Duster 1.6", "Duster 2.0", "Megane perua", "Megane sedan", "Kardian"],
+      TOYOTA: ["Etios Hatch 1.0", "Etios Hatch 1.5", "Etios sedan 1.0", "Etios sedan 1.5", "Corolla 1.8", "Corolla 2.0", "Yaris 1.0", "Yaris 1.6"],
+      NISSAN: ["March 3 cilindros", "March 1.0", "March 1.6", "Versa 3 cilindros", "Versa 1.0", "Versa 1.6", "Sentra 1.6", "Sentra 2.0", "Kicks 1.6"],
+      OUTROS: ["Modelo genérico"]
+    };
+
+    const itensManutencao = [
+      ["Cabo de vela", 80000], ["Bobina de ignição", 0], ["Vela Normal", 40000], ["Bobina independente", 200000],
+      ["Velas Dirídio", 100000], ["Filtro de Ar", 15000], ["Filtro de combustível", 10000], ["Filtro de Cabine", 10000],
+      ["Filtro de óleo", 10000], ["Filtro câmbio automático", 80000], ["Óleo do motor", 10000], ["Óleo da caixa de marcha Manual", 100000],
+      ["Óleo da caixa de marcha automática", 80000], ["Sistema de Arrefecimento", 60000], ["Limpeza de Bico", 35000],
+      ["Correia Dentada", 50000], ["Corrente de Comando", 150000], ["Correia banhada", 180000], ["Correia do alternador", 50000],
+      ["Rolamento de correia dentada", 50000], ["Tensor", 50000], ["Rolamento esticador", 100000], ["PNEUS", 50000]
+    ];
+
+    function atualizarModelos() {
+      const marca = document.getElementById("marca").value;
+      const modelos = marcasModelos[marca] || [];
+      const modeloSelect = document.getElementById("modelo");
+      modeloSelect.innerHTML = modelos.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    function preencherAnos() {
+      const anoSelect = document.getElementById("ano");
+      const anos = ["0KM"];
+      for (let a = 1997; a <= new Date().getFullYear(); a++) {
+        anos.push(a);
+      }
+      anoSelect.innerHTML = anos.map(ano => `<option value="${ano}">${ano}</option>`).join('');
+    }
+
+    function salvarConfiguracoes() {
+      localStorage.setItem("marca", document.getElementById("marca").value);
+      localStorage.setItem("modelo", document.getElementById("modelo").value);
+      localStorage.setItem("ano", document.getElementById("ano").value);
+    }
+
+    function carregarConfiguracoes() {
+      const marcaSalva = localStorage.getItem("marca");
+      const modeloSalvo = localStorage.getItem("modelo");
+      const anoSalvo = localStorage.getItem("ano");
+
+      if (marcaSalva && marcasModelos[marcaSalva]) {
+        document.getElementById("marca").value = marcaSalva;
+        atualizarModelos();
+        setTimeout(() => {
+          if (modeloSalvo) {
+            document.getElementById("modelo").value = modeloSalvo;
+          }
+        }, 50);
+      }
+
+      if (anoSalvo) {
+        document.getElementById("ano").value = anoSalvo;
+      }
+    }
+
+    function calcularLinha(el) {
+      const linha = el.parentElement.parentElement;
+      const autonomiaText = linha.children[1].textContent;
+      const autonomia = parseInt(autonomiaText) || 0;
+      const kmTroca = parseFloat(linha.children[2].children[0].value) || 0;
+      const valorPago = parseFloat(linha.children[3].children[0].value) || 0;
+
+      if (autonomia > 0 && kmTroca > 0) {
+        linha.children[4].textContent = kmTroca + autonomia;
+        linha.children[5].textContent = `R$ ${(valorPago / autonomia).toFixed(5)}`;
+      } else {
+        linha.children[4].textContent = "-";
+        linha.children[5].textContent = "-";
+      }
+
+      calcularTotais();
+    }
+
+    function calcularTotais() {
+      let custoTotal = 0;
+      const linhas = document.querySelectorAll("#corpoTabela tr");
+      linhas.forEach(linha => {
+        const custoKM = linha.children[5].textContent.replace("R$ ", "");
+        const custo = parseFloat(custoKM);
+        if (!isNaN(custo)) custoTotal += custo;
+      });
+      custoTotal = parseFloat(custoTotal.toFixed(5));
+      document.getElementById("custoTotalKm").textContent = `R$ ${custoTotal.toFixed(5)}`;
+    }
+
+    window.onload = () => {
+      const marcaSelect = document.getElementById("marca");
+      Object.keys(marcasModelos).forEach(m => {
+        marcaSelect.innerHTML += `<option value="${m}">${m}</option>`;
+      });
+      atualizarModelos();
+
+      const corpo = document.getElementById("corpoTabela");
+      itensManutencao.forEach(([item, autonomia]) => {
+        corpo.innerHTML += `
+          <tr>
+            <td>${item}</td>
+            <td>${autonomia > 0 ? autonomia + ' KM' : '-'}</td>
+            <td><input type="number" onchange="calcularLinha(this)" /></td>
+            <td><input type="number" onchange="calcularLinha(this)" /></td>
+            <td class="readonly"></td>
+            <td class="readonly"></td>
+          </tr>
+        `;
+      });
+
+      preencherAnos();
+      carregarConfiguracoes();
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("marca").addEventListener("change", salvarConfiguracoes);
+      document.getElementById("modelo").addEventListener("change", salvarConfiguracoes);
+      document.getElementById("ano").addEventListener("change", salvarConfiguracoes);
+    });
+  </script>
+</body>
+</html>
