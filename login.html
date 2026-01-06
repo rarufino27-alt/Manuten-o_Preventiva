@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Login – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+<link rel="stylesheet" href="./theme/layout.css">
+<link rel="stylesheet" href="./theme/components.css">
+
+<style>
+body{
+  background:linear-gradient(180deg,#fafafa,#f1f1f1);
+}
+
+.page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+
+.box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 10px 28px rgba(0,0,0,.1);
+}
+
+h1{
+  text-align:center;
+  color:#d4af37;
+  font-size:1.2rem;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:.85rem;
+  color:#666;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #ccc;
+  margin-bottom:14px;
+  font-size:.95rem;
+}
+
+button{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(180deg,#e6c97a,#d4af37);
+  font-weight:800;
+  font-size:1rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+<div class="box">
+
+<h1>Login</h1>
+<div class="subtitle">
+Use o <b>nome cadastrado</b> para entrar
+</div>
+
+<input id="loginNome" placeholder="Digite seu nome">
+
+<button onclick="entrar()">Entrar</button>
+
+</div>
+</div>
+
+<script>
+function entrar(){
+  const nome = loginNome.value.trim();
+  const user = JSON.parse(localStorage.getItem("usuario"));
+
+  if(!user){
+    alert("Nenhum cadastro encontrado");
+    return;
+  }
+
+  if(user.nome.toLowerCase() !== nome.toLowerCase()){
+    alert("Nome não confere com o cadastro");
+    return;
+  }
+
+  localStorage.setItem("logado", "true");
+
+  if(user.tipo === "motorista"){
+    window.location.href = "index.html";
+  }else{
+    window.location.href = "index-passageiro.html";
+  }
+}
+</script>
+
+</body>
+</html>
