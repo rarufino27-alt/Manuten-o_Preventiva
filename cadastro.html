@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cadastro – RF Driver</title>
+<title>RF Driver • Cadastro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
@@ -10,66 +10,90 @@
 <link rel="stylesheet" href="./theme/components.css">
 
 <style>
+:root{
+  --gold:#D4AF37;
+  --gold-soft:#E6C97A;
+  --text:#333;
+}
+
 body{
-  background:linear-gradient(180deg,#fafafa,#f1f1f1);
+  background:linear-gradient(180deg,#ffffff,#f2f2f2);
+  color:var(--text);
 }
 
 .page{
   min-height:100vh;
   display:flex;
   justify-content:center;
-  padding:20px;
+  align-items:center;
+  padding:22px;
 }
 
 .box{
   width:100%;
   max-width:420px;
-  background:#fff;
-  border-radius:22px;
-  padding:22px;
-  box-shadow:0 10px 28px rgba(0,0,0,.1);
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
-h1{
+.card{
+  background:#fff;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.logo{
   text-align:center;
-  color:#d4af37;
-  font-size:1.2rem;
-  margin-bottom:10px;
+  font-size:1.6rem;
+  font-weight:900;
+  letter-spacing:2px;
+  color:var(--gold);
 }
 
 .subtitle{
   text-align:center;
   font-size:.85rem;
   color:#666;
-  margin-bottom:20px;
+  margin-top:4px;
 }
 
 label{
+  font-size:.75rem;
   font-weight:700;
-  font-size:.8rem;
-  margin-bottom:6px;
   display:block;
+  margin:12px 0 6px;
 }
 
 input, select{
   width:100%;
-  padding:12px;
+  padding:14px;
   border-radius:14px;
   border:1px solid #ccc;
-  margin-bottom:12px;
   font-size:.95rem;
 }
 
-.hidden{display:none}
+.hidden{
+  display:none;
+}
 
-button{
-  width:100%;
+.btn{
   padding:16px;
-  border:none;
   border-radius:18px;
-  background:linear-gradient(180deg,#e6c97a,#d4af37);
-  font-weight:800;
+  border:none;
   font-size:1rem;
+  font-weight:800;
+}
+
+.btn-primary{
+  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+  color:#000;
+}
+
+.btn-outline{
+  background:#fff;
+  border:1px solid #ccc;
 }
 </style>
 </head>
@@ -79,80 +103,90 @@ button{
 <div class="page">
 <div class="box">
 
-<h1>Cadastro</h1>
-<div class="subtitle">Defina seu perfil para continuar</div>
+  <div class="card">
+    <div class="logo">RF DRIVER</div>
+    <div class="subtitle">Cadastro rápido</div>
 
-<label>Você é:</label>
-<select id="tipo">
-  <option value="">Selecione</option>
-  <option value="motorista">🚖 Motorista</option>
-  <option value="passageiro">🧍 Passageiro</option>
-</select>
+    <!-- TIPO DE USUÁRIO -->
+    <label>Você é:</label>
+    <select id="tipoUsuario" onchange="toggleTipo()">
+      <option value="">Selecione</option>
+      <option value="motorista">🚗 Motorista</option>
+      <option value="passageiro">🧍 Passageiro</option>
+    </select>
 
-<div id="formMotorista" class="hidden">
-  <label>Nome do motorista</label>
-  <input id="nomeMotorista" placeholder="Ex: João Silva">
+    <!-- CAMPOS COMUNS -->
+    <div id="comum" class="hidden">
+      <label>Nome completo</label>
+      <input type="text" id="nome" placeholder="Ex: João Silva">
 
-  <label>Telefone</label>
-  <input id="telefone" placeholder="Ex: 81 9xxxx-xxxx">
+      <label>Telefone</label>
+      <input type="tel" id="telefone" placeholder="Ex: (81) 9xxxx-xxxx">
+    </div>
 
-  <label>Placa do carro</label>
-  <input id="placa" placeholder="Ex: ABC-1234">
+    <!-- CAMPOS MOTORISTA -->
+    <div id="motoristaCampos" class="hidden">
+      <label>Placa do veículo</label>
+      <input type="text" id="placa" placeholder="Ex: ABC1D23">
 
-  <label>Modelo do carro</label>
-  <input id="modelo" placeholder="Ex: Corolla 2020">
+      <label>Modelo do veículo</label>
+      <input type="text" id="modelo" placeholder="Ex: Onix, HB20, Versa">
+    </div>
+
+    <button class="btn btn-primary" onclick="cadastrar()">
+      Salvar cadastro
+    </button>
+  </div>
+
+  <button class="btn btn-outline" onclick="voltarLogin()">
+    ⬅ Voltar para login
+  </button>
+
+</div>
 </div>
 
-<div id="formPassageiro" class="hidden">
-  <label>Nome do passageiro</label>
-  <input id="nomePassageiro" placeholder="Ex: Maria">
-</div>
-
-<button onclick="cadastrar()">Concluir cadastro</button>
-
-</div>
-</div>
+<script src="core/global.js"></script>
 
 <script>
-const tipoSel = document.getElementById("tipo");
-const fm = document.getElementById("formMotorista");
-const fp = document.getElementById("formPassageiro");
-
-tipoSel.onchange = () => {
-  fm.classList.toggle("hidden", tipoSel.value !== "motorista");
-  fp.classList.toggle("hidden", tipoSel.value !== "passageiro");
-};
+function toggleTipo(){
+  const tipo = document.getElementById("tipoUsuario").value;
+  document.getElementById("comum").classList.toggle("hidden", !tipo);
+  document.getElementById("motoristaCampos").classList.toggle("hidden", tipo !== "motorista");
+}
 
 function cadastrar(){
-  if(!tipoSel.value){
-    alert("Selecione o tipo de usuário");
+  const tipo = document.getElementById("tipoUsuario").value;
+  const nome = document.getElementById("nome").value.trim();
+  const telefone = document.getElementById("telefone").value.trim();
+
+  if(!tipo || !nome){
+    alert("Preencha os dados obrigatórios.");
     return;
   }
 
-  let user = { tipo: tipoSel.value };
+  const usuario = {
+    tipo,
+    nome,
+    telefone
+  };
 
-  if(user.tipo === "motorista"){
-    user.nome = nomeMotorista.value.trim();
-    user.telefone = telefone.value.trim();
-    user.placa = placa.value.trim();
-    user.modelo = modelo.value.trim();
-
-    if(!user.nome || !user.placa || !user.modelo){
-      alert("Preencha todos os dados do motorista");
-      return;
-    }
+  if(tipo === "motorista"){
+    usuario.placa = document.getElementById("placa").value.trim();
+    usuario.modelo = document.getElementById("modelo").value.trim();
   }
 
-  if(user.tipo === "passageiro"){
-    user.nome = nomePassageiro.value.trim();
-    if(!user.nome){
-      alert("Informe seu nome");
-      return;
-    }
-  }
+  App.set("usuario", usuario);
 
-  localStorage.setItem("usuario", JSON.stringify(user));
-  window.location.href = "login.html";
+  // REDIRECIONAMENTO INTELIGENTE
+  if(tipo === "motorista"){
+    App.go("index.html");
+  }else{
+    App.go("index-passageiro.html");
+  }
+}
+
+function voltarLogin(){
+  App.go("login.html");
 }
 </script>
 
