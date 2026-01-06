@@ -44,7 +44,7 @@ label{
   margin-top:12px;
   display:block;
 }
-input{
+input, select{
   width:100%;
   padding:12px;
   border-radius:14px;
@@ -64,6 +64,9 @@ button{
   color:#000;
   cursor:pointer;
 }
+.hidden{
+  display:none;
+}
 </style>
 </head>
 
@@ -72,7 +75,14 @@ button{
 <div class="container">
 
   <h1>Cadastro</h1>
-  <div class="sub">Cadastro para passageiros e motoristas</div>
+  <div class="sub">Escolha como deseja se cadastrar</div>
+
+  <label>Tipo de cadastro</label>
+  <select id="tipo" onchange="ajustarFormulario()">
+    <option value="">Selecione</option>
+    <option value="passageiro">Passageiro</option>
+    <option value="motorista">Motorista</option>
+  </select>
 
   <label>Nome completo</label>
   <input type="text" id="nome">
@@ -80,11 +90,13 @@ button{
   <label>Telefone</label>
   <input type="tel" id="telefone">
 
-  <label>Placa do carro (opcional)</label>
-  <input type="text" id="placa">
+  <div id="dados-motorista" class="hidden">
+    <label>Placa do carro</label>
+    <input type="text" id="placa">
 
-  <label>Modelo do carro (opcional)</label>
-  <input type="text" id="modelo">
+    <label>Modelo do carro</label>
+    <input type="text" id="modelo">
+  </div>
 
   <button type="button" onclick="cadastrar()">Cadastrar</button>
 
@@ -100,32 +112,45 @@ const supabaseClient = supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
+/* ================= UI ================= */
+function ajustarFormulario(){
+  const tipo = document.getElementById("tipo").value;
+  const blocoMotorista = document.getElementById("dados-motorista");
+
+  if(tipo === "motorista"){
+    blocoMotorista.classList.remove("hidden");
+  } else {
+    blocoMotorista.classList.add("hidden");
+  }
+}
+
 /* ================= CADASTRO ================= */
 async function cadastrar(){
 
+  const tipo = document.getElementById("tipo").value;
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const placa = document.getElementById("placa").value.trim();
   const modelo = document.getElementById("modelo").value.trim();
 
-  if(!nome || !telefone){
-    alert("Nome e telefone são obrigatórios.");
+  if(!tipo || !nome || !telefone){
+    alert("Preencha todos os campos obrigatórios.");
     return;
   }
 
-  const tipo = (placa || modelo) ? "motorista" : "passageiro";
+  if(tipo === "motorista" && (!placa || !modelo)){
+    alert("Informe placa e modelo do veículo.");
+    return;
+  }
 
   const dados = {
+    tipo,
     nome,
     telefone,
-    tipo,
-    ativo: true
+    ativo: true,
+    placa: tipo === "motorista" ? placa : null,
+    modelo_carro: tipo === "motorista" ? modelo : null
   };
-
-  if(tipo === "motorista"){
-    dados.placa = placa || null;
-    dados.modelo_carro = modelo || null;
-  }
 
   const { error } = await supabaseClient
     .from("usuarios")
