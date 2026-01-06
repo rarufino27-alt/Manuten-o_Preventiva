@@ -10,71 +10,6 @@
 <link rel="stylesheet" href="./theme/components.css">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body{
-  background:linear-gradient(180deg,#ffffff,#f2f2f2);
-  display:flex;
-  justify-content:center;
-  padding:20px;
-  color:#333;
-}
-
-.container{
-  width:100%;
-  max-width:420px;
-  background:#fff;
-  padding:24px;
-  border-radius:22px;
-  box-shadow:0 10px 28px rgba(0,0,0,.1);
-}
-
-h1{
-  text-align:center;
-  color:#d4af37;
-  margin-bottom:8px;
-}
-
-.sub{
-  text-align:center;
-  font-size:.85rem;
-  color:#666;
-  margin-bottom:20px;
-}
-
-label{
-  font-size:.8rem;
-  font-weight:700;
-  margin-top:12px;
-  display:block;
-}
-
-input, select{
-  width:100%;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #ccc;
-  margin-top:6px;
-  font-size:.95rem;
-}
-
-button{
-  margin-top:20px;
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:18px;
-  background:linear-gradient(180deg,#e6c97a,#d4af37);
-  font-size:1rem;
-  font-weight:800;
-  color:#000;
-  cursor:pointer;
-}
-
-.hidden{
-  display:none;
-}
-</style>
 </head>
 
 <body>
@@ -92,25 +27,24 @@ button{
   </select>
 
   <label>Nome completo</label>
-  <input type="text" id="nome" placeholder="Ex: João Silva">
+  <input type="text" id="nome">
 
   <label>Telefone</label>
-  <input type="tel" id="telefone" placeholder="Ex: 81999999999">
+  <input type="tel" id="telefone">
 
-  <div id="dados-motorista" class="hidden">
+  <div id="dados-motorista" style="display:none">
     <label>Placa do carro</label>
-    <input type="text" id="placa" placeholder="Ex: ABC1D23">
+    <input type="text" id="placa">
 
     <label>Modelo do carro</label>
-    <input type="text" id="modelo" placeholder="Ex: Onix 2022">
+    <input type="text" id="modelo">
   </div>
 
-  <button type="button" onclick="cadastrar()">Cadastrar</button>
+  <button onclick="cadastrar()">Cadastrar</button>
 
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
 const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU";
 
@@ -119,19 +53,12 @@ const supabaseClient = supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
-/* ================= UI ================= */
 function ajustarFormulario(){
   const tipo = document.getElementById("tipo").value;
-  const blocoMotorista = document.getElementById("dados-motorista");
-
-  if(tipo === "motorista"){
-    blocoMotorista.classList.remove("hidden");
-  } else {
-    blocoMotorista.classList.add("hidden");
-  }
+  document.getElementById("dados-motorista").style.display =
+    tipo === "motorista" ? "block" : "none";
 }
 
-/* ================= CADASTRO ================= */
 async function cadastrar(){
 
   const tipo = document.getElementById("tipo").value;
@@ -139,16 +66,15 @@ async function cadastrar(){
   const telefone = document.getElementById("telefone").value.trim();
 
   if(!tipo || !nome || !telefone){
-    alert("Preencha todos os campos obrigatórios.");
+    alert("Preencha todos os campos.");
     return;
   }
 
-  // 🔐 gera credenciais simples
   const telefoneLimpo = telefone.replace(/\D/g,"");
-  const email = telefoneLimpo + "@rfdriver.app";
+  const email = telefoneLimpo + "@rfdriver.com"; // ✅ DOMÍNIO VÁLIDO
   const senha = telefoneLimpo.slice(-6);
 
-  /* 1️⃣ CRIA USUÁRIO NO AUTH */
+  // 1️⃣ CRIA LOGIN
   const { data: authData, error: authError } =
     await supabaseClient.auth.signUp({
       email,
@@ -160,49 +86,30 @@ async function cadastrar(){
     return;
   }
 
-  /* 2️⃣ MONTA PERFIL */
+  // 2️⃣ SALVA PERFIL
   const dados = {
     auth_id: authData.user.id,
     tipo,
     nome,
     telefone,
-    ativo: true,
-    placa: null,
-    modelo_carro: null
+    ativo: true
   };
 
   if(tipo === "motorista"){
-    const placa = document.getElementById("placa").value.trim();
-    const modelo = document.getElementById("modelo").value.trim();
-
-    if(!placa || !modelo){
-      alert("Informe placa e modelo do veículo.");
-      return;
-    }
-
-    dados.placa = placa;
-    dados.modelo_carro = modelo;
+    dados.placa = document.getElementById("placa").value.trim();
+    dados.modelo_carro = document.getElementById("modelo").value.trim();
   }
 
-  /* 3️⃣ SALVA NO BANCO */
   const { error } = await supabaseClient
     .from("usuarios")
     .insert([dados]);
 
   if(error){
-    alert("Erro ao salvar cadastro: " + error.message);
+    alert("Erro ao salvar perfil.");
     return;
   }
 
-  alert(
-`Cadastro realizado com sucesso!
-
-Login: ${email}
-Senha: ${senha}
-
-Guarde esses dados.`
-  );
-
+  alert(`Cadastro realizado!\nTelefone: ${telefone}\nSenha: ${senha}`);
   window.location.href = "login.html";
 }
 </script>
