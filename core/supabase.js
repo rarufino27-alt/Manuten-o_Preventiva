@@ -4,34 +4,50 @@
    CONFIGURAÇÃO SUPABASE
 ========================= */
 const SUPABASE_URL = "COLE_AQUI_SEU_PROJECT_URL";
-const SUPABASE_KEY = "COLE_AQUI_SUA_ANON_PUBLIC_KEY";
+const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_ANON_PUBLIC_KEY";
 
-const supabase = supabaseJs.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+const supabaseClient = supabase.createClient(
+const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU";
 );
 
 /* =========================
-   USUÁRIOS
+   FUNÇÕES DE USUÁRIO
 ========================= */
+
+/**
+ * Salvar novo usuário
+ * dados = {
+ *   tipo: "motorista" | "passageiro",
+ *   nome: "",
+ *   telefone: "",
+ *   placa?: "",
+ *   modelo?: ""
+ * }
+ */
 async function salvarUsuario(dados) {
-  const { data, error } = await supabase
+  const { error } = await supabaseClient
     .from("usuarios")
-    .insert([dados]);
+    .insert([{
+      ...dados,
+      ativo: true
+    }]);
 
   if (error) {
-    alert("Erro ao salvar cadastro");
-    console.error(error);
-    return false;
+    console.error("Erro ao salvar usuário:", error);
+    return { ok: false, erro: error.message };
   }
-  return true;
+
+  return { ok: true };
 }
 
-async function loginUsuario(nome, telefone) {
-  const { data, error } = await supabase
+/**
+ * Login por telefone
+ */
+async function buscarUsuarioPorTelefone(telefone) {
+  const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .eq("nome", nome)
     .eq("telefone", telefone)
     .eq("ativo", true)
     .single();
@@ -39,6 +55,19 @@ async function loginUsuario(nome, telefone) {
   if (error || !data) {
     return null;
   }
+
   return data;
+}
+
+/**
+ * Bloqueio futuro (admin)
+ */
+async function bloquearUsuario(id) {
+  const { error } = await supabaseClient
+    .from("usuarios")
+    .update({ ativo: false })
+    .eq("id", id);
+
+  return !error;
 }
 </script>
