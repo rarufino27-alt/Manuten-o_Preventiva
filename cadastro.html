@@ -115,17 +115,17 @@ input, select{
       <option value="passageiro">🧍 Passageiro</option>
     </select>
 
-    <!-- CAMPOS COMUNS -->
-    <div id="comum" class="hidden">
+    <!-- CAMPOS COMUNS (PASSAGEIRO E MOTORISTA) -->
+    <div id="camposComuns" class="hidden">
       <label>Nome completo</label>
       <input type="text" id="nome" placeholder="Ex: João Silva">
 
-      <label>Telefone</label>
+      <label>Telefone / WhatsApp</label>
       <input type="tel" id="telefone" placeholder="Ex: (81) 9xxxx-xxxx">
     </div>
 
-    <!-- CAMPOS MOTORISTA -->
-    <div id="motoristaCampos" class="hidden">
+    <!-- CAMPOS EXCLUSIVOS MOTORISTA -->
+    <div id="camposMotorista" class="hidden">
       <label>Placa do veículo</label>
       <input type="text" id="placa" placeholder="Ex: ABC1D23">
 
@@ -150,8 +150,12 @@ input, select{
 <script>
 function toggleTipo(){
   const tipo = document.getElementById("tipoUsuario").value;
-  document.getElementById("comum").classList.toggle("hidden", !tipo);
-  document.getElementById("motoristaCampos").classList.toggle("hidden", tipo !== "motorista");
+
+  document.getElementById("camposComuns")
+    .classList.toggle("hidden", !tipo);
+
+  document.getElementById("camposMotorista")
+    .classList.toggle("hidden", tipo !== "motorista");
 }
 
 function cadastrar(){
@@ -159,8 +163,8 @@ function cadastrar(){
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
 
-  if(!tipo || !nome){
-    alert("Preencha os dados obrigatórios.");
+  if(!tipo || !nome || !telefone){
+    alert("Informe nome e telefone para continuar.");
     return;
   }
 
@@ -171,13 +175,21 @@ function cadastrar(){
   };
 
   if(tipo === "motorista"){
-    usuario.placa = document.getElementById("placa").value.trim();
-    usuario.modelo = document.getElementById("modelo").value.trim();
+    const placa = document.getElementById("placa").value.trim();
+    const modelo = document.getElementById("modelo").value.trim();
+
+    if(!placa || !modelo){
+      alert("Informe placa e modelo do veículo.");
+      return;
+    }
+
+    usuario.placa = placa;
+    usuario.modelo = modelo;
   }
 
   App.set("usuario", usuario);
 
-  // REDIRECIONAMENTO INTELIGENTE
+  // REDIRECIONAMENTO
   if(tipo === "motorista"){
     App.go("index.html");
   }else{
