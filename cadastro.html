@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>RF Driver • Cadastro</title>
+<title>Cadastro – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
@@ -10,60 +10,36 @@
 <link rel="stylesheet" href="./theme/components.css">
 
 <style>
-:root{
-  --gold:#D4AF37;
-  --gold-soft:#E6C97A;
-  --text:#333;
-}
-
 body{
-  background:linear-gradient(180deg,#ffffff,#f2f2f2);
-  color:var(--text);
-}
-
-.page{
-  min-height:100vh;
+  background:linear-gradient(180deg,#ffffff,#f1f1f1);
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:22px;
+  min-height:100vh;
 }
 
 .box{
   width:100%;
   max-width:420px;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-.card{
+  padding:26px;
   background:#fff;
   border-radius:22px;
-  padding:26px;
   box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
-.logo{
+h1{
   text-align:center;
   font-size:1.6rem;
-  font-weight:900;
-  letter-spacing:2px;
-  color:var(--gold);
-}
-
-.subtitle{
-  text-align:center;
-  font-size:.85rem;
-  color:#666;
-  margin-top:4px;
+  font-weight:800;
+  color:#d4af37;
+  margin-bottom:18px;
 }
 
 label{
-  font-size:.75rem;
+  font-size:.8rem;
   font-weight:700;
+  margin-top:10px;
   display:block;
-  margin:12px 0 6px;
 }
 
 input, select{
@@ -72,133 +48,86 @@ input, select{
   border-radius:14px;
   border:1px solid #ccc;
   font-size:.95rem;
+  margin-top:6px;
 }
 
-.hidden{
-  display:none;
-}
-
-.btn{
+button{
+  width:100%;
   padding:16px;
-  border-radius:18px;
+  border-radius:16px;
   border:none;
-  font-size:1rem;
+  background:linear-gradient(180deg,#e6c97a,#d4af37);
   font-weight:800;
-}
-
-.btn-primary{
-  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
-  color:#000;
-}
-
-.btn-outline{
-  background:#fff;
-  border:1px solid #ccc;
+  font-size:1rem;
+  margin-top:18px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="page">
 <div class="box">
+  <h1>Criar cadastro</h1>
 
-  <div class="card">
-    <div class="logo">RF DRIVER</div>
-    <div class="subtitle">Cadastro rápido</div>
+  <label>Você é:</label>
+  <select id="perfil" onchange="toggleCampos()">
+    <option value="passageiro">Passageiro</option>
+    <option value="motorista">Motorista</option>
+  </select>
 
-    <!-- TIPO DE USUÁRIO -->
-    <label>Você é:</label>
-    <select id="tipoUsuario" onchange="toggleTipo()">
-      <option value="">Selecione</option>
-      <option value="motorista">🚗 Motorista</option>
-      <option value="passageiro">🧍 Passageiro</option>
-    </select>
+  <label>Nome</label>
+  <input id="nome" placeholder="Nome completo">
 
-    <!-- CAMPOS COMUNS (PASSAGEIRO E MOTORISTA) -->
-    <div id="camposComuns" class="hidden">
-      <label>Nome completo</label>
-      <input type="text" id="nome" placeholder="Ex: João Silva">
+  <label>Telefone</label>
+  <input id="telefone" placeholder="Telefone">
 
-      <label>Telefone / WhatsApp</label>
-      <input type="tel" id="telefone" placeholder="Ex: (81) 9xxxx-xxxx">
-    </div>
+  <div id="motoristaCampos" style="display:none">
+    <label>Placa do carro</label>
+    <input id="placa" placeholder="ABC-1234">
 
-    <!-- CAMPOS EXCLUSIVOS MOTORISTA -->
-    <div id="camposMotorista" class="hidden">
-      <label>Placa do veículo</label>
-      <input type="text" id="placa" placeholder="Ex: ABC1D23">
-
-      <label>Modelo do veículo</label>
-      <input type="text" id="modelo" placeholder="Ex: Onix, HB20, Versa">
-    </div>
-
-    <button class="btn btn-primary" onclick="cadastrar()">
-      Salvar cadastro
-    </button>
+    <label>Modelo do carro</label>
+    <input id="modelo" placeholder="Ex: Corolla, Onix">
   </div>
 
-  <button class="btn btn-outline" onclick="voltarLogin()">
-    ⬅ Voltar para login
-  </button>
-
-</div>
+  <button onclick="cadastrar()">Cadastrar</button>
 </div>
 
 <script src="core/global.js"></script>
-
 <script>
-function toggleTipo(){
-  const tipo = document.getElementById("tipoUsuario").value;
-
-  document.getElementById("camposComuns")
-    .classList.toggle("hidden", !tipo);
-
-  document.getElementById("camposMotorista")
-    .classList.toggle("hidden", tipo !== "motorista");
+function toggleCampos(){
+  const perfil = document.getElementById("perfil").value;
+  document.getElementById("motoristaCampos").style.display =
+    perfil === "motorista" ? "block" : "none";
 }
 
 function cadastrar(){
-  const tipo = document.getElementById("tipoUsuario").value;
+  const perfil = document.getElementById("perfil").value;
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
 
-  if(!tipo || !nome || !telefone){
-    alert("Informe nome e telefone para continuar.");
+  if(!nome || !telefone){
+    alert("Preencha os campos obrigatórios");
     return;
   }
 
   const usuario = {
-    tipo,
+    perfil,
     nome,
     telefone
   };
 
-  if(tipo === "motorista"){
-    const placa = document.getElementById("placa").value.trim();
-    const modelo = document.getElementById("modelo").value.trim();
-
-    if(!placa || !modelo){
-      alert("Informe placa e modelo do veículo.");
-      return;
-    }
-
-    usuario.placa = placa;
-    usuario.modelo = modelo;
+  if(perfil === "motorista"){
+    usuario.placa = document.getElementById("placa").value.trim();
+    usuario.modelo = document.getElementById("modelo").value.trim();
   }
 
   App.set("usuario", usuario);
 
-  // REDIRECIONAMENTO
-  if(tipo === "motorista"){
+  if(perfil === "motorista"){
     App.go("index.html");
   }else{
     App.go("index-passageiro.html");
   }
-}
-
-function voltarLogin(){
-  App.go("login.html");
 }
 </script>
 
