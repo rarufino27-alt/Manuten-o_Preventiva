@@ -32,7 +32,7 @@ body{
 h1{
   text-align:center;
   color:#d4af37;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 .sub{
@@ -77,89 +77,64 @@ button{
 <div class="container">
 
   <h1>Cadastro</h1>
-  <div class="sub">Informe seus dados para continuar</div>
-
-  <label>Tipo de usuário</label>
-  <select id="tipo">
-    <option value="">Selecione</option>
-    <option value="motorista">Motorista</option>
-    <option value="passageiro">Passageiro</option>
-  </select>
+  <div class="sub">Cadastro exclusivo para motoristas</div>
 
   <label>Nome completo</label>
-  <input type="text" id="nome" placeholder="Ex: João Silva">
+  <input type="text" id="nome">
 
   <label>Telefone</label>
-  <input type="tel" id="telefone" placeholder="Ex: 81999999999">
+  <input type="tel" id="telefone">
 
-  <div id="camposMotorista" style="display:none">
-    <label>Placa do carro</label>
-    <input type="text" id="placa" placeholder="Ex: ABC1D23">
+  <label>Placa do carro</label>
+  <input type="text" id="placa">
 
-    <label>Modelo do carro</label>
-    <input type="text" id="modelo" placeholder="Ex: Onix 2022">
-  </div>
+  <label>Modelo do carro</label>
+  <input type="text" id="modelo">
 
-  <button onclick="cadastrar()">Cadastrar</button>
+  <button onclick="cadastrarMotorista()">Cadastrar</button>
 
 </div>
 
 <script>
 /* ================= SUPABASE ================= */
 const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU";
+const SUPABASE_ANON_KEY = "SUA_ANON_KEY_AQUI";
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-/* ================= UI ================= */
-document.getElementById("tipo").addEventListener("change", e=>{
-  document.getElementById("camposMotorista").style.display =
-    e.target.value === "motorista" ? "block" : "none";
-});
-
-/* ================= CADASTRO ================= */
-async function cadastrar(){
-  const tipo = document.getElementById("tipo").value;
+/* ================= CADASTRO MOTORISTA ================= */
+async function cadastrarMotorista(){
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const placa = document.getElementById("placa").value.trim();
   const modelo = document.getElementById("modelo").value.trim();
 
-  if(!tipo || !nome || !telefone){
-    alert("Preencha os campos obrigatórios.");
+  if(!nome || !telefone || !placa || !modelo){
+    alert("Preencha todos os campos.");
     return;
-  }
-
-  const dados = {
-    tipo,
-    nome,
-    telefone,
-    ativo: true
-  };
-
-  if(tipo === "motorista"){
-    if(!placa || !modelo){
-      alert("Preencha os dados do veículo.");
-      return;
-    }
-    dados.placa = placa;
-    dados.modelo = modelo;
   }
 
   const { error } = await supabaseClient
     .from("usuarios")
-    .insert([dados]);
+    .insert([{
+      tipo: "motorista",
+      nome,
+      telefone,
+      placa,
+      modelo,
+      ativo: true
+    }]);
 
   if(error){
     console.error(error);
-    alert("Erro ao cadastrar. Verifique se o telefone já existe.");
+    alert("Erro ao cadastrar motorista. Verifique se o telefone já existe.");
     return;
   }
 
-  alert("Cadastro realizado com sucesso!");
+  alert("Motorista cadastrado com sucesso!");
   window.location.href = "login.html";
 }
 </script>
