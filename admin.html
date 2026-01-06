@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Admin – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+
+<style>
+body{
+  background:#f4f4f4;
+  font-family:Arial, sans-serif;
+  padding:16px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:16px;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:10px;
+  font-size:.7rem;
+  font-weight:700;
+}
+
+.motorista{background:#d4af37;color:#000}
+.passageiro{background:#ccc;color:#000}
+
+.ativo{color:green;font-weight:700}
+.bloqueado{color:red;font-weight:700}
+
+button{
+  margin-top:8px;
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+}
+
+.btn-bloquear{background:#ff5c5c;color:#fff}
+.btn-ativar{background:#4caf50;color:#fff}
+</style>
+</head>
+
+<body>
+
+<h1>📋 Admin – Usuários</h1>
+
+<div id="lista"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
+const SUPABASE_ANON_KEY = "COLE_AQUI_A_MESMA_CHAVE_QUE_JÁ_USA";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+async function carregarUsuarios(){
+  const { data, error } = await supabaseClient
+    .from("usuarios")
+    .select("*")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    alert("Erro ao carregar usuários");
+    return;
+  }
+
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  data.forEach(u=>{
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div>
+        <strong>${u.nome}</strong><br>
+        📞 ${u.telefone}<br>
+        <span class="badge ${u.tipo}">
+          ${u.tipo.toUpperCase()}
+        </span>
+      </div>
+
+      ${u.tipo==="motorista" ? `
+        <div>🚗 ${u.modelo || "-"} | ${u.placa || "-"}</div>
+      ` : ""}
+
+      <div>
+        Status:
+        <span class="${u.ativo ? "ativo":"bloqueado"}">
+          ${u.ativo ? "ATIVO":"BLOQUEADO"}
+        </span>
+      </div>
+
+      <button class="${u.ativo ? "btn-bloquear":"btn-ativar"}"
+        onclick="alterarStatus('${u.id}',${!u.ativo})">
+        ${u.ativo ? "Bloquear":"Ativar"}
+      </button>
+    `;
+
+    lista.appendChild(div);
+  });
+}
+
+async function alterarStatus(id,ativo){
+  const { error } = await supabaseClient
+    .from("usuarios")
+    .update({ ativo })
+    .eq("id", id);
+
+  if(error){
+    alert("Erro ao alterar status");
+    return;
+  }
+
+  carregarUsuarios();
+}
+
+carregarUsuarios();
+</script>
+
+</body>
+</html>
