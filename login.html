@@ -11,34 +11,49 @@
 
 <style>
 body{
-  background:linear-gradient(180deg,#ffffff,#f1f1f1);
+  min-height:100vh;
+  background:linear-gradient(180deg,#ffffff,#f2f2f2);
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
 }
 
 .box{
   width:100%;
   max-width:420px;
-  padding:28px;
-  background:#fff;
-  border-radius:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  padding:26px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.header{
   text-align:center;
 }
 
-h1{
-  font-size:1.8rem;
+.header h1{
+  font-size:1.6rem;
   font-weight:800;
-  color:#d4af37;
-  margin-bottom:6px;
+  color:#D4AF37;
 }
 
-p{
+.header p{
   font-size:.85rem;
   color:#666;
-  margin-bottom:22px;
+}
+
+.card{
+  background:#fff;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
+}
+
+label{
+  font-size:.8rem;
+  font-weight:700;
+  margin-bottom:6px;
+  display:block;
 }
 
 input{
@@ -47,23 +62,28 @@ input{
   border-radius:14px;
   border:1px solid #ccc;
   font-size:.95rem;
-  margin-bottom:14px;
 }
 
-button{
-  width:100%;
+.btn{
   padding:16px;
-  border-radius:16px;
+  border-radius:18px;
   border:none;
-  background:linear-gradient(180deg,#e6c97a,#d4af37);
   font-weight:800;
-  font-size:1rem;
-  margin-bottom:12px;
 }
 
-.link{
-  font-size:.8rem;
-  color:#444;
+.btn-primary{
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
+}
+
+.btn-secondary{
+  background:#fff;
+  border:1px solid #ccc;
+}
+
+.footer{
+  text-align:center;
+  font-size:.75rem;
+  color:#777;
 }
 </style>
 </head>
@@ -71,49 +91,60 @@ button{
 <body>
 
 <div class="box">
-  <h1>RF Driver</h1>
-  <p>Entre para continuar</p>
 
-  <input type="text" id="loginNome" placeholder="Digite seu nome">
-
-  <button onclick="entrar()">Entrar</button>
-
-  <div class="link">
-    Não tem cadastro?
-    <a href="cadastro.html">Criar conta</a>
+  <div class="header">
+    <h1>RF Driver</h1>
+    <p>Acesso rápido e seguro</p>
   </div>
+
+  <div class="card">
+    <label>🔑 Login</label>
+    <input id="login" placeholder="Nome do motorista ou celular do passageiro">
+  </div>
+
+  <button class="btn btn-primary" onclick="entrar()">
+    ▶ Entrar
+  </button>
+
+  <button class="btn btn-secondary" onclick="App.go('cadastro.html')">
+    ➕ Criar cadastro
+  </button>
+
+  <div class="footer">
+    Seu login é criado no cadastro.<br>
+    Motorista entra pelo nome • Passageiro pelo celular
+  </div>
+
 </div>
 
 <script src="core/global.js"></script>
 <script>
-(function autoLogin(){
-  const user = App.get("usuario");
-  if(user){
-    redirecionar(user.perfil);
-  }
-})();
-
 function entrar(){
-  const nome = document.getElementById("loginNome").value.trim();
-  if(!nome){
-    alert("Informe seu nome");
+  const login = document.getElementById("login").value.trim();
+  if(!login){
+    alert("Informe seu login");
     return;
   }
 
-  const user = App.get("usuario");
-  if(!user || user.nome.toLowerCase() !== nome.toLowerCase()){
-    alert("Usuário não encontrado. Faça o cadastro.");
+  const usuario = App.get("usuario");
+  if(!usuario){
+    alert("Cadastro não encontrado. Crie um cadastro.");
     return;
   }
 
-  redirecionar(user.perfil);
-}
+  if(
+    usuario.login === login ||
+    usuario.celular === login
+  ){
+    App.set("logado", true);
 
-function redirecionar(perfil){
-  if(perfil === "motorista"){
-    App.go("index.html");
+    if(usuario.tipo === "motorista"){
+      App.go("index.html");
+    }else{
+      App.go("index-passageiro.html");
+    }
   }else{
-    App.go("index-passageiro.html");
+    alert("Login incorreto.");
   }
 }
 </script>
