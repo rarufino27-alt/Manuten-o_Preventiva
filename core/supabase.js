@@ -1,8 +1,7 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
 /* =========================
-   CONFIGURAÇÃO SUPABASE
+   SUPABASE CONFIG
 ========================= */
+
 const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU";
 
@@ -12,38 +11,31 @@ const supabaseClient = supabase.createClient(
 );
 
 /* =========================
-   FUNÇÕES DE USUÁRIO
+   USUÁRIOS
 ========================= */
 
-/**
- * Salvar novo usuário
- * dados = {
- *   tipo: "motorista" | "passageiro",
- *   nome: "",
- *   telefone: "",
- *   placa?: "",
- *   modelo?: ""
- * }
- */
+// Criar usuário
 async function salvarUsuario(dados) {
   const { error } = await supabaseClient
     .from("usuarios")
     .insert([{
-      ...dados,
+      tipo: dados.tipo,
+      nome: dados.nome,
+      telefone: dados.telefone,
+      placa: dados.placa || null,
+      modelo: dados.modelo || null,
       ativo: true
     }]);
 
   if (error) {
-    console.error("Erro ao salvar usuário:", error);
-    return { ok: false, erro: error.message };
+    console.error("Erro Supabase:", error);
+    return false;
   }
 
-  return { ok: true };
+  return true;
 }
 
-/**
- * Login por telefone
- */
+// Login por telefone
 async function buscarUsuarioPorTelefone(telefone) {
   const { data, error } = await supabaseClient
     .from("usuarios")
@@ -58,16 +50,3 @@ async function buscarUsuarioPorTelefone(telefone) {
 
   return data;
 }
-
-/**
- * Bloqueio futuro (admin)
- */
-async function bloquearUsuario(id) {
-  const { error } = await supabaseClient
-    .from("usuarios")
-    .update({ ativo: false })
-    .eq("id", id);
-
-  return !error;
-}
-</script>
