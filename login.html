@@ -2,77 +2,43 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>RF Driver • Login</title>
+<title>Login – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- PWA -->
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#D4AF37">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 
 <link rel="stylesheet" href="./theme/theme.css">
 <link rel="stylesheet" href="./theme/layout.css">
 <link rel="stylesheet" href="./theme/components.css">
 
 <style>
-:root{
-  --gold:#D4AF37;
-  --gold-soft:#E6C97A;
-  --text:#333;
-}
-
 body{
-  background:linear-gradient(180deg,#ffffff,#f2f2f2);
-  color:var(--text);
-}
-
-.page{
-  min-height:100vh;
+  background:linear-gradient(180deg,#ffffff,#f1f1f1);
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:22px;
+  min-height:100vh;
 }
 
 .box{
   width:100%;
   max-width:420px;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-
-/* CARD */
-.card{
+  padding:28px;
   background:#fff;
-  border-radius:26px;
-  padding:30px 26px;
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  border-radius:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  text-align:center;
 }
 
-/* LOGO */
-.logo{
-  text-align:center;
-  font-size:1.9rem;
-  font-weight:900;
-  letter-spacing:3px;
-  color:var(--gold);
+h1{
+  font-size:1.8rem;
+  font-weight:800;
+  color:#d4af37;
+  margin-bottom:6px;
 }
 
-.subtitle{
-  text-align:center;
+p{
   font-size:.85rem;
   color:#666;
-  margin-top:6px;
-}
-
-/* INPUT */
-label{
-  font-size:.75rem;
-  font-weight:700;
-  display:block;
-  margin:14px 0 6px;
+  margin-bottom:22px;
 }
 
 input{
@@ -81,138 +47,74 @@ input{
   border-radius:14px;
   border:1px solid #ccc;
   font-size:.95rem;
+  margin-bottom:14px;
 }
 
-/* BOTÕES */
-.btn{
+button{
+  width:100%;
   padding:16px;
-  border-radius:18px;
+  border-radius:16px;
   border:none;
-  font-size:1rem;
+  background:linear-gradient(180deg,#e6c97a,#d4af37);
   font-weight:800;
+  font-size:1rem;
+  margin-bottom:12px;
 }
 
-.btn-primary{
-  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
-  color:#000;
-}
-
-.btn-outline{
-  background:#fff;
-  border:1px solid #ccc;
-}
-
-.divider{
-  text-align:center;
-  font-size:.7rem;
-  color:#777;
-  margin:6px 0;
-}
-
-/* FOOTER */
-.footer{
-  text-align:center;
-  font-size:.75rem;
-  color:#777;
+.link{
+  font-size:.8rem;
+  color:#444;
 }
 </style>
 </head>
 
 <body>
 
-<div class="page">
 <div class="box">
+  <h1>RF Driver</h1>
+  <p>Entre para continuar</p>
 
-  <div class="card">
+  <input type="text" id="loginNome" placeholder="Digite seu nome">
 
-    <div class="logo">RF DRIVER</div>
-    <div class="subtitle">Acesso ao aplicativo</div>
+  <button onclick="entrar()">Entrar</button>
 
-    <!-- LOGIN SIMPLES -->
-    <label>Seu nome (conforme cadastro)</label>
-    <input
-      type="text"
-      id="loginNome"
-      placeholder="Ex: João Silva"
-      autocomplete="username"
-    >
-
-    <button class="btn btn-primary" onclick="loginNormal()">
-      Entrar
-    </button>
-
-    <div class="divider">ou</div>
-
-    <!-- LOGIN RÁPIDO -->
-    <button class="btn btn-outline" onclick="loginRapido()">
-      🔒 Acesso rápido (biometria / celular)
-    </button>
-
+  <div class="link">
+    Não tem cadastro?
+    <a href="cadastro.html">Criar conta</a>
   </div>
-
-  <button class="btn btn-outline" onclick="irCadastro()">
-    ➕ Criar cadastro
-  </button>
-
-  <div class="footer">
-    Mobilidade com excelência
-  </div>
-
-</div>
 </div>
 
 <script src="core/global.js"></script>
-
 <script>
-// LOGIN NORMAL
-function loginNormal(){
-  const nomeDigitado = document.getElementById("loginNome").value.trim();
-  const usuario = App.get("usuario");
+(function autoLogin(){
+  const user = App.get("usuario");
+  if(user){
+    redirecionar(user.perfil);
+  }
+})();
 
-  if(!usuario){
-    alert("Nenhum cadastro encontrado. Crie um cadastro primeiro.");
+function entrar(){
+  const nome = document.getElementById("loginNome").value.trim();
+  if(!nome){
+    alert("Informe seu nome");
     return;
   }
 
-  if(!nomeDigitado){
-    alert("Informe seu nome para entrar.");
+  const user = App.get("usuario");
+  if(!user || user.nome.toLowerCase() !== nome.toLowerCase()){
+    alert("Usuário não encontrado. Faça o cadastro.");
     return;
   }
 
-  if(usuario.nome.toLowerCase() !== nomeDigitado.toLowerCase()){
-    alert("Nome não confere com o cadastro.");
-    return;
-  }
-
-  entrar(usuario);
+  redirecionar(user.perfil);
 }
 
-// LOGIN RÁPIDO (BIOMETRIA / DISPOSITIVO)
-async function loginRapido(){
-  const usuario = App.get("usuario");
-
-  if(!usuario){
-    alert("Nenhum cadastro encontrado.");
-    return;
-  }
-
-  // Simples fallback seguro
-  entrar(usuario);
-}
-
-// REDIRECIONAMENTO CENTRAL
-function entrar(usuario){
-  App.set("logado", true);
-
-  if(usuario.tipo === "motorista"){
+function redirecionar(perfil){
+  if(perfil === "motorista"){
     App.go("index.html");
   }else{
     App.go("index-passageiro.html");
   }
-}
-
-function irCadastro(){
-  App.go("cadastro.html");
 }
 </script>
 
