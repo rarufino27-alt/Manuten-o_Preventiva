@@ -11,55 +11,43 @@
 
 <style>
 body{
-  background:linear-gradient(180deg,#ffffff,#f1f1f1);
+  min-height:100vh;
+  background:linear-gradient(180deg,#ffffff,#f2f2f2);
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
 }
 
 .box{
   width:100%;
   max-width:420px;
   padding:26px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.card{
   background:#fff;
-  border-radius:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
 }
 
-h1{
-  text-align:center;
-  font-size:1.6rem;
-  font-weight:800;
-  color:#d4af37;
-  margin-bottom:18px;
-}
-
-label{
-  font-size:.8rem;
-  font-weight:700;
-  margin-top:10px;
-  display:block;
-}
-
-input, select{
+select,input{
   width:100%;
   padding:14px;
   border-radius:14px;
   border:1px solid #ccc;
-  font-size:.95rem;
-  margin-top:6px;
+  margin-bottom:10px;
 }
 
-button{
-  width:100%;
+.btn{
   padding:16px;
-  border-radius:16px;
+  border-radius:18px;
   border:none;
-  background:linear-gradient(180deg,#e6c97a,#d4af37);
   font-weight:800;
-  font-size:1rem;
-  margin-top:18px;
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
 }
 </style>
 </head>
@@ -67,67 +55,77 @@ button{
 <body>
 
 <div class="box">
-  <h1>Criar cadastro</h1>
 
-  <label>Você é:</label>
-  <select id="perfil" onchange="toggleCampos()">
-    <option value="passageiro">Passageiro</option>
-    <option value="motorista">Motorista</option>
-  </select>
+  <div class="card">
+    <select id="tipo" onchange="trocarTipo()">
+      <option value="">Sou...</option>
+      <option value="motorista">🚗 Motorista</option>
+      <option value="passageiro">👤 Passageiro</option>
+    </select>
 
-  <label>Nome</label>
-  <input id="nome" placeholder="Nome completo">
+    <div id="formMotorista" style="display:none">
+      <input id="nome" placeholder="Nome completo">
+      <input id="placa" placeholder="Placa do veículo">
+      <input id="modelo" placeholder="Modelo do veículo">
+      <small>🔑 Seu login será seu nome</small>
+    </div>
 
-  <label>Telefone</label>
-  <input id="telefone" placeholder="Telefone">
-
-  <div id="motoristaCampos" style="display:none">
-    <label>Placa do carro</label>
-    <input id="placa" placeholder="ABC-1234">
-
-    <label>Modelo do carro</label>
-    <input id="modelo" placeholder="Ex: Corolla, Onix">
+    <div id="formPassageiro" style="display:none">
+      <input id="nomePass" placeholder="Nome">
+      <input id="celular" placeholder="Celular (ex: 81999999999)">
+      <small>🔑 Seu login será seu celular</small>
+    </div>
   </div>
 
-  <button onclick="cadastrar()">Cadastrar</button>
+  <button class="btn" onclick="cadastraraptor()">
+    💾 Salvar cadastro
+  </button>
+
 </div>
 
 <script src="core/global.js"></script>
 <script>
-function toggleCampos(){
-  const perfil = document.getElementById("perfil").value;
-  document.getElementById("motoristaCampos").style.display =
-    perfil === "motorista" ? "block" : "none";
+function trocarTipo(){
+  const tipo = document.getElementById("tipo").value;
+  document.getElementById("formMotorista").style.display =
+    tipo === "motorista" ? "block" : "none";
+  document.getElementById("formPassageiro").style.display =
+    tipo === "passageiro" ? "block" : "none";
 }
 
-function cadastrar(){
-  const perfil = document.getElementById("perfil").value;
-  const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-
-  if(!nome || !telefone){
-    alert("Preencha os campos obrigatórios");
+function salvar(){
+  const tipo = document.getElementById("tipo").value;
+  if(!tipo){
+    alert("Selecione o tipo");
     return;
   }
 
-  const usuario = {
-    perfil,
-    nome,
-    telefone
-  };
+  let usuario = { tipo };
 
-  if(perfil === "motorista"){
-    usuario.placa = document.getElementById("placa").value.trim();
-    usuario.modelo = document.getElementById("modelo").value.trim();
+  if(tipo === "motorista"){
+    usuario.nome = nome.value.trim();
+    usuario.placa = placa.value.trim();
+    usuario.modelo = modelo.value.trim();
+    usuario.login = usuario.nome;
+
+    if(!usuario.nome || !usuario.placa || !usuario.modelo){
+      alert("Preencha todos os campos");
+      return;
+    }
+  }else{
+    usuario.nome = nomePass.value.trim();
+    usuario.celular = celular.value.trim();
+    usuario.login = usuario.celular;
+
+    if(!usuario.nome || !usuario.celular){
+      alert("Preencha todos os campos");
+      return;
+    }
   }
 
   App.set("usuario", usuario);
-
-  if(perfil === "motorista"){
-    App.go("index.html");
-  }else{
-    App.go("index-passageiro.html");
-  }
+  alert("Cadastro realizado com sucesso");
+  App.go("login.html");
 }
 </script>
 
