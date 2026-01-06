@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cadastro – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+<link rel="stylesheet" href="./theme/layout.css">
+<link rel="stylesheet" href="./theme/components.css">
+
+<style>
+body{
+  background:linear-gradient(180deg,#fafafa,#f1f1f1);
+}
+
+.page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+
+.box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 10px 28px rgba(0,0,0,.1);
+}
+
+h1{
+  text-align:center;
+  color:#d4af37;
+  font-size:1.2rem;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:.85rem;
+  color:#666;
+  margin-bottom:20px;
+}
+
+label{
+  font-weight:700;
+  font-size:.8rem;
+  margin-bottom:6px;
+  display:block;
+}
+
+input, select{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #ccc;
+  margin-bottom:12px;
+  font-size:.95rem;
+}
+
+.hidden{display:none}
+
+button{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(180deg,#e6c97a,#d4af37);
+  font-weight:800;
+  font-size:1rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+<div class="box">
+
+<h1>Cadastro</h1>
+<div class="subtitle">Defina seu perfil para continuar</div>
+
+<label>Você é:</label>
+<select id="tipo">
+  <option value="">Selecione</option>
+  <option value="motorista">🚖 Motorista</option>
+  <option value="passageiro">🧍 Passageiro</option>
+</select>
+
+<div id="formMotorista" class="hidden">
+  <label>Nome do motorista</label>
+  <input id="nomeMotorista" placeholder="Ex: João Silva">
+
+  <label>Telefone</label>
+  <input id="telefone" placeholder="Ex: 81 9xxxx-xxxx">
+
+  <label>Placa do carro</label>
+  <input id="placa" placeholder="Ex: ABC-1234">
+
+  <label>Modelo do carro</label>
+  <input id="modelo" placeholder="Ex: Corolla 2020">
+</div>
+
+<div id="formPassageiro" class="hidden">
+  <label>Nome do passageiro</label>
+  <input id="nomePassageiro" placeholder="Ex: Maria">
+</div>
+
+<button onclick="cadastrar()">Concluir cadastro</button>
+
+</div>
+</div>
+
+<script>
+const tipoSel = document.getElementById("tipo");
+const fm = document.getElementById("formMotorista");
+const fp = document.getElementById("formPassageiro");
+
+tipoSel.onchange = () => {
+  fm.classList.toggle("hidden", tipoSel.value !== "motorista");
+  fp.classList.toggle("hidden", tipoSel.value !== "passageiro");
+};
+
+function cadastrar(){
+  if(!tipoSel.value){
+    alert("Selecione o tipo de usuário");
+    return;
+  }
+
+  let user = { tipo: tipoSel.value };
+
+  if(user.tipo === "motorista"){
+    user.nome = nomeMotorista.value.trim();
+    user.telefone = telefone.value.trim();
+    user.placa = placa.value.trim();
+    user.modelo = modelo.value.trim();
+
+    if(!user.nome || !user.placa || !user.modelo){
+      alert("Preencha todos os dados do motorista");
+      return;
+    }
+  }
+
+  if(user.tipo === "passageiro"){
+    user.nome = nomePassageiro.value.trim();
+    if(!user.nome){
+      alert("Informe seu nome");
+      return;
+    }
+  }
+
+  localStorage.setItem("usuario", JSON.stringify(user));
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
