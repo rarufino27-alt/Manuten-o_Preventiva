@@ -5,146 +5,51 @@
 <title>Login – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
-
-<style>
-body{
-  min-height:100vh;
-  background:linear-gradient(180deg,#ffffff,#f2f2f2);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.box{
-  width:100%;
-  max-width:420px;
-  padding:26px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-.header{
-  text-align:center;
-}
-
-.header h1{
-  font-size:1.6rem;
-  font-weight:800;
-  color:#D4AF37;
-}
-
-.header p{
-  font-size:.85rem;
-  color:#666;
-}
-
-.card{
-  background:#fff;
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);
-}
-
-label{
-  font-size:.8rem;
-  font-weight:700;
-  margin-bottom:6px;
-  display:block;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid #ccc;
-  font-size:.95rem;
-}
-
-.btn{
-  padding:16px;
-  border-radius:18px;
-  border:none;
-  font-weight:800;
-}
-
-.btn-primary{
-  background:linear-gradient(180deg,#E6C97A,#D4AF37);
-}
-
-.btn-secondary{
-  background:#fff;
-  border:1px solid #ccc;
-}
-
-.footer{
-  text-align:center;
-  font-size:.75rem;
-  color:#777;
-}
-</style>
+<link rel="stylesheet" href="theme/theme.css">
+<link rel="stylesheet" href="theme/layout.css">
+<link rel="stylesheet" href="theme/components.css">
 </head>
 
 <body>
 
-<div class="box">
+<div class="page">
+<div class="container">
 
-  <div class="header">
-    <h1>RF Driver</h1>
-    <p>Acesso rápido e seguro</p>
-  </div>
+<h2>Acesso</h2>
 
-  <div class="card">
-    <label>🔑 Login</label>
-    <input id="login" placeholder="Nome do motorista ou celular do passageiro">
-  </div>
+<label>Nome</label>
+<input id="nome">
 
-  <button class="btn btn-primary" onclick="entrar()">
-    ▶ Entrar
-  </button>
+<label>Telefone</label>
+<input id="telefone">
 
-  <button class="btn btn-secondary" onclick="App.go('cadastro.html')">
-    ➕ Criar cadastro
-  </button>
+<button onclick="entrar()">Entrar</button>
 
-  <div class="footer">
-    Seu login é criado no cadastro.<br>
-    Motorista entra pelo nome • Passageiro pelo celular
-  </div>
+<p>
+<a href="cadastro.html">Criar cadastro</a>
+</p>
 
+</div>
 </div>
 
 <script src="core/global.js"></script>
+<script src="core/supabase.js"></script>
+
 <script>
-function entrar(){
-  const login = document.getElementById("login").value.trim();
-  if(!login){
-    alert("Informe seu login");
+async function entrar() {
+  const user = await loginUsuario(nome.value, telefone.value);
+
+  if (!user) {
+    alert("Usuário não encontrado ou bloqueado");
     return;
   }
 
-  const usuario = App.get("usuario");
-  if(!usuario){
-    alert("Cadastro não encontrado. Crie um cadastro.");
-    return;
-  }
+  App.set("usuario", user);
 
-  if(
-    usuario.login === login ||
-    usuario.celular === login
-  ){
-    App.set("logado", true);
-
-    if(usuario.tipo === "motorista"){
-      App.go("index.html");
-    }else{
-      App.go("index-passageiro.html");
-    }
-  }else{
-    alert("Login incorreto.");
+  if (user.tipo === "motorista") {
+    App.go("index.html");
+  } else {
+    App.go("index-passageiro.html");
   }
 }
 </script>
