@@ -19,7 +19,6 @@ body{
   padding:20px;
   color:#333;
 }
-
 .container{
   width:100%;
   max-width:420px;
@@ -28,27 +27,23 @@ body{
   border-radius:22px;
   box-shadow:0 10px 28px rgba(0,0,0,.1);
 }
-
 h1{
   text-align:center;
   color:#d4af37;
   margin-bottom:8px;
 }
-
 .sub{
   text-align:center;
   font-size:.85rem;
   color:#666;
   margin-bottom:20px;
 }
-
 label{
   font-size:.8rem;
   font-weight:700;
   margin-top:12px;
   display:block;
 }
-
 input{
   width:100%;
   padding:12px;
@@ -57,7 +52,6 @@ input{
   margin-top:6px;
   font-size:.95rem;
 }
-
 button{
   margin-top:20px;
   width:100%;
@@ -78,7 +72,7 @@ button{
 <div class="container">
 
   <h1>Cadastro</h1>
-  <div class="sub">Motoristas e passageiros</div>
+  <div class="sub">Cadastro para passageiros e motoristas</div>
 
   <label>Nome completo</label>
   <input type="text" id="nome">
@@ -92,9 +86,7 @@ button{
   <label>Modelo do carro (opcional)</label>
   <input type="text" id="modelo">
 
-  <button type="button" onclick="cadastrar()">
-    Cadastrar
-  </button>
+  <button type="button" onclick="cadastrar()">Cadastrar</button>
 
 </div>
 
@@ -110,18 +102,18 @@ const supabaseClient = supabase.createClient(
 
 /* ================= CADASTRO ================= */
 async function cadastrar(){
+
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const placa = document.getElementById("placa").value.trim();
   const modelo = document.getElementById("modelo").value.trim();
 
   if(!nome || !telefone){
-    alert("Preencha nome e telefone.");
+    alert("Nome e telefone são obrigatórios.");
     return;
   }
 
-  // regra automática
-  const tipo = placa && modelo ? "motorista" : "passageiro";
+  const tipo = (placa || modelo) ? "motorista" : "passageiro";
 
   const dados = {
     nome,
@@ -131,8 +123,8 @@ async function cadastrar(){
   };
 
   if(tipo === "motorista"){
-    dados.placa = placa;
-    dados.modelo_carro = modelo;
+    dados.placa = placa || null;
+    dados.modelo_carro = modelo || null;
   }
 
   const { error } = await supabaseClient
@@ -146,6 +138,13 @@ async function cadastrar(){
   }
 
   alert("Cadastro realizado com sucesso!");
+
+  // 🔀 REDIRECIONAMENTO CORRETO
+  if(tipo === "motorista"){
+    window.location.href = "index-motorista.html";
+  } else {
+    window.location.href = "index-passageiro.html";
+  }
 }
 </script>
 
