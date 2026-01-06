@@ -130,46 +130,53 @@ async function cadastrar(){
   const tipo = document.getElementById("tipo").value;
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
-  const placa = document.getElementById("placa").value.trim();
-  const modelo = document.getElementById("modelo").value.trim();
+
+  // email e senha (pode gerar ou pedir)
+  const email = telefone.replace(/\D/g,"") + "@rfdriver.com";
+  const senha = telefone.replace(/\D/g,"").slice(-6);
 
   if(!tipo || !nome || !telefone){
-    alert("Preencha todos os campos obrigatórios.");
+    alert("Preencha os campos obrigatórios");
     return;
   }
 
-  if(tipo === "motorista" && (!placa || !modelo)){
-    alert("Informe placa e modelo do veículo.");
+  // 1️⃣ CRIA LOGIN NO AUTH
+  const { data: authData, error: authError } =
+    await supabaseClient.auth.signUp({
+      email,
+      password: senha
+    });
+
+  if(authError){
+    alert("Erro auth: " + authError.message);
     return;
   }
 
+  // 2️⃣ SALVA PERFIL NA TABELA
   const dados = {
+    auth_id: authData.user.id,
     tipo,
     nome,
     telefone,
-    ativo: true,
-    placa: tipo === "motorista" ? placa : null,
-    modelo_carro: tipo === "motorista" ? modelo : null
+    ativo: true
   };
+
+  if(tipo === "motorista"){
+    dados.placa = document.getElementById("placa").value.trim();
+    dados.modelo_carro = document.getElementById("modelo").value.trim();
+  }
 
   const { error } = await supabaseClient
     .from("usuarios")
     .insert([dados]);
 
   if(error){
-    console.error(error);
-    alert("Erro ao cadastrar: " + error.message);
+    alert("Erro banco: " + error.message);
     return;
   }
 
-  alert("Cadastro realizado com sucesso!");
-
-  // 🔀 REDIRECIONAMENTO CORRETO
-  if(tipo === "motorista"){
-    window.location.href = "index.html";
-  } else {
-    window.location.href = "index-passageiro.html";
-  }
+  alert(`Cadastro OK!\nLogin: ${email}\nSenha: ${senha}`);
+  window.location.href = "login.html";
 }
 </script>
 
