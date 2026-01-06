@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Passageiro – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#D4AF37">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="./theme/theme.css">
+<link rel="stylesheet" href="./theme/layout.css">
+<link rel="stylesheet" href="./theme/components.css">
+
+<style>
+:root{
+  --gold:#D4AF37;
+  --gold-soft:#E6C97A;
+  --bg:#F6F6F6;
+  --text:#333;
+}
+
+/* BASE */
+body{
+  background:linear-gradient(180deg,#ffffff,#f2f2f2);
+  color:var(--text);
+}
+
+.page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
+
+.box{
+  width:100%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+/* CARD PRINCIPAL */
+.hero{
+  text-align:center;
+  padding:34px 26px;
+  border-radius:26px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(0,0,0,.08);
+  border:1px solid rgba(212,175,55,.35);
+}
+
+/* MARCA */
+.brand{
+  font-size:1.9rem;
+  font-weight:800;
+  letter-spacing:2px;
+  background:linear-gradient(120deg,var(--gold),var(--gold-soft),var(--gold));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.subtitle{
+  margin-top:6px;
+  font-size:.9rem;
+  color:#666;
+}
+
+/* TEXTO */
+.info{
+  margin-top:18px;
+  font-size:.95rem;
+  color:#555;
+  line-height:1.5;
+}
+
+/* BOTÃO */
+.btn-primary{
+  margin-top:26px;
+  padding:18px;
+  border-radius:20px;
+  border:none;
+  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+  font-size:1.05rem;
+  font-weight:800;
+  color:#000;
+  box-shadow:0 10px 22px rgba(212,175,55,.35);
+}
+
+/* SEGURANÇA */
+.trust{
+  text-align:center;
+  font-size:.75rem;
+  color:#777;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:6px;
+}
+
+/* RODAPÉ */
+.footer{
+  text-align:center;
+  font-size:.75rem;
+  color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+  <div class="box">
+
+    <!-- CARD -->
+    <div class="hero">
+      <div class="brand">RF DRIVER</div>
+      <div class="subtitle">Simulação de valor da viagem</div>
+
+      <div class="info">
+        Consulte o valor estimado da sua corrida de forma rápida, clara e transparente.<br>
+        Sem compromisso e sem envio automático.
+      </div>
+
+      <button class="btn-primary" id="btnSimular">
+        🚖 Calcular valor da viagem
+      </button>
+
+      <div class="trust">
+        <span>🔒 Seguro</span>
+        <span>•</span>
+        <span>⭐ Transparente</span>
+        <span>•</span>
+        <span>🚗 Confiável</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      Ferramenta oficial RF Driver para passageiros
+    </div>
+
+  </div>
+</div>
+
+<script src="core/global.js"></script>
+<script>
+document.getElementById("btnSimular").onclick = () => {
+  App.reset();
+  App.go("origem.html");
+};
+</script>
+
+</body>
+</html>
