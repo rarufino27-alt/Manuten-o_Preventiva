@@ -70,6 +70,7 @@ button{
   font-size:1rem;
   font-weight:800;
   color:#000;
+  cursor:pointer;
 }
 
 .link{
@@ -119,9 +120,18 @@ const supabaseClient = supabase.createClient(
 /* ================= LOGIN ================= */
 async function login(){
 
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+  const telefone = document.getElementById("telefone").value.trim();
 
+  if(!telefone){
+    alert("Informe o telefone.");
+    return;
+  }
+
+  const telefoneLimpo = telefone.replace(/\D/g,"");
+  const email = telefoneLimpo + "@rfdriver.app";
+  const senha = telefoneLimpo.slice(-6);
+
+  // 1️⃣ LOGIN AUTH
   const { data, error } =
     await supabaseClient.auth.signInWithPassword({
       email,
@@ -129,19 +139,25 @@ async function login(){
     });
 
   if(error){
-    alert("Login inválido");
+    alert("Telefone não encontrado ou inválido.");
     return;
   }
 
   const userId = data.user.id;
 
-  // buscar tipo
-  const { data: perfil } = await supabaseClient
+  // 2️⃣ BUSCAR PERFIL
+  const { data: perfil, error: perfilError } = await supabaseClient
     .from("usuarios")
     .select("tipo")
     .eq("auth_id", userId)
     .single();
 
+  if(perfilError || !perfil){
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  // 3️⃣ REDIRECIONAMENTO
   if(perfil.tipo === "motorista"){
     window.location.href = "index.html";
   } else {
