@@ -364,5 +364,75 @@ Veículo: ${usuario.modelo || "-"} | Placa: ${usuario.placa || "-"}`;
 }
 </script>
 
+<script>
+async function gerarPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  let y = 20;
+
+  // TÍTULO
+  doc.setFontSize(16);
+  doc.text("RF Driver – Recibo de Viagem", 105, y, { align: "center" });
+
+  y += 10;
+  doc.setFontSize(10);
+  doc.text("Documento gerado automaticamente", 105, y, { align: "center" });
+
+  y += 12;
+  doc.line(20, y, 190, y);
+  y += 10;
+
+  // ROTA
+  doc.setFontSize(12);
+  doc.text(`Origem: ${origem}`, 20, y); y += 7;
+  doc.text(`Destino: ${destino}`, 20, y); y += 10;
+
+  // DETALHAMENTO
+  doc.setFontSize(11);
+  doc.text("Detalhamento da viagem:", 20, y);
+  y += 8;
+
+  detalhesWhats.forEach(item=>{
+    doc.text(item.replace(/\*/g,""), 24, y);
+    y += 6;
+  });
+
+  y += 6;
+  doc.line(20, y, 190, y);
+  y += 10;
+
+  // TOTAL
+  doc.setFontSize(14);
+  doc.text(`Total: R$ ${App.get("total").toFixed(2)}`, 20, y);
+
+  y += 20;
+
+  // ASSINATURA AUTOMÁTICA
+  doc.setFontSize(10);
+  doc.text("Motorista responsável:", 20, y); y += 6;
+
+  doc.setFontSize(12);
+  doc.text(usuario.nome, 20, y); y += 6;
+
+  doc.setFontSize(10);
+  doc.text(`Veículo: ${usuario.modelo || "-"}`, 20, y); y += 5;
+  doc.text(`Placa: ${usuario.placa || "-"}`, 20, y); y += 8;
+
+  doc.setFontSize(9);
+  doc.text("Assinatura digital automática • RF Driver", 20, y);
+
+  y += 15;
+  doc.setFontSize(8);
+  doc.text(
+    "Este recibo foi gerado automaticamente pelo aplicativo RF Driver.",
+    105,
+    y,
+    { align: "center" }
+  );
+
+  doc.save(`recibo-rf-driver-${Date.now()}.pdf`);
+}
+</script>
 </body>
 </html>
