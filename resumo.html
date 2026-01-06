@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Resumo – Passageiro | RF Driver</title>
+<title>Resumo – Motorista | RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
@@ -31,22 +31,22 @@ body{
 
 /* HEADER */
 .header{
-  padding:20px;
+  padding:18px;
   border-radius:22px;
-  background:#fff;
+  background:#000;
+  color:#fff;
   text-align:center;
-  box-shadow:0 8px 22px rgba(0,0,0,.08);
 }
 
 .header h1{
   font-size:1.4rem;
-  font-weight:800;
+  font-weight:900;
   color:#d4af37;
 }
 
 .header span{
   font-size:.8rem;
-  color:#666;
+  opacity:.85;
 }
 
 /* CARD */
@@ -86,7 +86,6 @@ body{
   padding:22px;
   text-align:center;
   color:#000;
-  box-shadow:0 10px 28px rgba(0,0,0,.18);
 }
 
 .totalLabel{
@@ -95,19 +94,34 @@ body{
 }
 
 .total{
-  font-size:2.4rem;
+  font-size:2.5rem;
   font-weight:900;
 }
 
-/* BOTÃO */
-.btn{
+/* ASSINATURA */
+.signature{
+  font-size:.75rem;
+  text-align:center;
+  opacity:.7;
+}
+
+/* BOTÕES */
+.btn-primary{
   padding:18px;
   border-radius:18px;
   border:none;
-  background:#000;
-  color:#fff;
+  background:#25d366;
+  color:#000;
+  reminding: bold;
   font-size:1rem;
-  font-weight:700;
+  font-weight:900;
+}
+
+.btn-secondary{
+  padding:14px;
+  border-radius:16px;
+  border:1px solid #ccc;
+  background:#fff;
 }
 </style>
 </head>
@@ -120,7 +134,7 @@ body{
   <!-- HEADER -->
   <div class="header">
     <h1>Resumo da Viagem</h1>
-    <span>Valor estimado</span>
+    <span>Motorista</span>
   </div>
 
   <!-- ROTA -->
@@ -142,12 +156,19 @@ body{
 
   <!-- TOTAL -->
   <div class="totalBox">
-    <div class="totalLabel">Valor estimado</div>
+    <div class="totalLabel">Total da corrida</div>
     <div class="total" id="total">R$ 0,00</div>
   </div>
 
-  <!-- VOLTAR -->
-  <button class="btn" onclick="voltar()">
+  <!-- ASSINATURA -->
+  <div class="signature" id="assinatura"></div>
+
+  <!-- AÇÕES -->
+  <button class="btn-primary" onclick="enviarWhats()">
+    📲 Enviar recibo no WhatsApp
+  </button>
+
+  <button class="btn-secondary" onclick="voltar()">
     ⬅ Voltar
   </button>
 
@@ -160,7 +181,9 @@ body{
 
 <script>
 const usuario = App.get("usuario");
-if (!usuario || usuario.tipo !== "passageiro") {
+
+// 🔒 Segurança
+if (!usuario || usuario.tipo !== "motorista") {
   location.href = "login.html";
 }
 
@@ -173,17 +196,23 @@ document.getElementById("destinoTxt").innerText = destino;
 
 const detalheDiv = document.getElementById("detalhamento");
 const totalDiv = document.getElementById("total");
+const assinaturaDiv = document.getElementById("assinatura");
+
+let detalhesWhats = [];
 
 function calcular(){
   let total = valorBase;
   let detalhes = [];
+  detalhesWhats = [];
 
   detalhes.push(["🚖 Viagem base", valorBase]);
+  detalhesWhats.push(`🚖 *Viagem base*: R$ ${valorBase.toFixed(2)}`);
 
   if (Dinamico?.ativo) {
     const acres = valorBase * (Dinamico.multiplicador - 1);
     total += acres;
     detalhes.push(["⚡ Tarifa dinâmica", acres]);
+    detalhesWhats.push(`⚡ *Tarifa dinâmica*: +R$ ${acres.toFixed(2)}`);
   }
 
   const tipo = App.get("tipoViagem");
@@ -192,19 +221,25 @@ function calcular(){
     const acres = valorBase * 0.80;
     total += acres;
     detalhes.push(["♻️ Bate e volta (+80%)", acres]);
+    detalhesWhats.push(`♻️ *Bate e volta*: +R$ ${acres.toFixed(2)}`);
   }
 
   if (tipo === "ida_volta") {
     total += valorBase;
     detalhes.push(["🚕 Ida e volta", valorBase]);
+    detalhesWhats.push(`🚕 *Ida e volta*: +R$ ${valorBase.toFixed(2)}`);
   }
 
   if (tipo === "ida_volta_espera") {
     const idaVolta = valorBase * 2;
     const acres = idaVolta * 0.10;
     total += (idaVolta - valorBase) + acres;
+
     detalhes.push(["🚕 Ida e volta", idaVolta - valorBase]);
     detalhes.push(["⏳ Acréscimo de espera (10%)", acres]);
+
+    detalhesWhats.push(`🚕 *Ida e volta*: +R$ ${(idaVolta - valorBase).toFixed(2)}`);
+    detalhesWhats.push(`⏳ *Espera (10%)*: +R$ ${acres.toFixed(2)}`);
   }
 
   detalheDiv.innerHTML = detalhes.map(d => `
@@ -215,9 +250,40 @@ function calcular(){
   `).join("");
 
   totalDiv.innerText = `R$ ${total.toFixed(2)}`;
+  App.set("total", total);
 }
 
 calcular();
+
+// ASSINATURA
+assinaturaDiv.innerHTML = `
+👤 ${usuario.nome}<br>
+🚗 ${usuario.modelo} – ${usuario.placa}
+`;
+
+function enviarWhats(){
+  const msg =
+`🚖 *RF Driver – Recibo de viagem*
+
+📌 *Origem*: ${origem}
+🏁 *Destino*: ${destino}
+
+*Detalhamento*
+${detalhesWhats.join("\n")}
+
+💰 *Total*: R$ ${App.get("total").toFixed(2)}
+
+👤 *Motorista*: ${usuario.nome}
+🚗 *Veículo*: ${usuario.modelo}
+🔑 *Placa*: ${usuario.placa}
+
+RF Driver • Mobilidade com excelência`;
+
+  window.open(
+    "https://wa.me/?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
+}
 
 function voltar(){
   App.go("destino.html");
