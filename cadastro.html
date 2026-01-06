@@ -19,6 +19,7 @@ body{
   padding:20px;
   color:#333;
 }
+
 .container{
   width:100%;
   max-width:420px;
@@ -27,23 +28,27 @@ body{
   border-radius:22px;
   box-shadow:0 10px 28px rgba(0,0,0,.1);
 }
+
 h1{
   text-align:center;
   color:#d4af37;
   margin-bottom:8px;
 }
+
 .sub{
   text-align:center;
   font-size:.85rem;
   color:#666;
   margin-bottom:20px;
 }
+
 label{
   font-size:.8rem;
   font-weight:700;
   margin-top:12px;
   display:block;
 }
+
 input, select{
   width:100%;
   padding:12px;
@@ -52,6 +57,7 @@ input, select{
   margin-top:6px;
   font-size:.95rem;
 }
+
 button{
   margin-top:20px;
   width:100%;
@@ -64,6 +70,7 @@ button{
   color:#000;
   cursor:pointer;
 }
+
 .hidden{
   display:none;
 }
@@ -85,17 +92,17 @@ button{
   </select>
 
   <label>Nome completo</label>
-  <input type="text" id="nome">
+  <input type="text" id="nome" placeholder="Ex: João Silva">
 
   <label>Telefone</label>
-  <input type="tel" id="telefone">
+  <input type="tel" id="telefone" placeholder="Ex: 81999999999">
 
   <div id="dados-motorista" class="hidden">
     <label>Placa do carro</label>
-    <input type="text" id="placa">
+    <input type="text" id="placa" placeholder="Ex: ABC1D23">
 
     <label>Modelo do carro</label>
-    <input type="text" id="modelo">
+    <input type="text" id="modelo" placeholder="Ex: Onix 2022">
   </div>
 
   <button type="button" onclick="cadastrar()">Cadastrar</button>
@@ -131,16 +138,17 @@ async function cadastrar(){
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
 
-  // email e senha (pode gerar ou pedir)
-  const email = telefone.replace(/\D/g,"") + "@rfdriver.com";
-  const senha = telefone.replace(/\D/g,"").slice(-6);
-
   if(!tipo || !nome || !telefone){
-    alert("Preencha os campos obrigatórios");
+    alert("Preencha todos os campos obrigatórios.");
     return;
   }
 
-  // 1️⃣ CRIA LOGIN NO AUTH
+  // 🔐 gera credenciais simples
+  const telefoneLimpo = telefone.replace(/\D/g,"");
+  const email = telefoneLimpo + "@rfdriver.app";
+  const senha = telefoneLimpo.slice(-6);
+
+  /* 1️⃣ CRIA USUÁRIO NO AUTH */
   const { data: authData, error: authError } =
     await supabaseClient.auth.signUp({
       email,
@@ -148,34 +156,53 @@ async function cadastrar(){
     });
 
   if(authError){
-    alert("Erro auth: " + authError.message);
+    alert("Erro ao criar login: " + authError.message);
     return;
   }
 
-  // 2️⃣ SALVA PERFIL NA TABELA
+  /* 2️⃣ MONTA PERFIL */
   const dados = {
     auth_id: authData.user.id,
     tipo,
     nome,
     telefone,
-    ativo: true
+    ativo: true,
+    placa: null,
+    modelo_carro: null
   };
 
   if(tipo === "motorista"){
-    dados.placa = document.getElementById("placa").value.trim();
-    dados.modelo_carro = document.getElementById("modelo").value.trim();
+    const placa = document.getElementById("placa").value.trim();
+    const modelo = document.getElementById("modelo").value.trim();
+
+    if(!placa || !modelo){
+      alert("Informe placa e modelo do veículo.");
+      return;
+    }
+
+    dados.placa = placa;
+    dados.modelo_carro = modelo;
   }
 
+  /* 3️⃣ SALVA NO BANCO */
   const { error } = await supabaseClient
     .from("usuarios")
     .insert([dados]);
 
   if(error){
-    alert("Erro banco: " + error.message);
+    alert("Erro ao salvar cadastro: " + error.message);
     return;
   }
 
-  alert(`Cadastro OK!\nLogin: ${email}\nSenha: ${senha}`);
+  alert(
+`Cadastro realizado com sucesso!
+
+Login: ${email}
+Senha: ${senha}
+
+Guarde esses dados.`
+  );
+
   window.location.href = "login.html";
 }
 </script>
