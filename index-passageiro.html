@@ -2,33 +2,31 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Passageiro – RF Driver</title>
+<title>Passageiro 5 Estrelas – Simulação</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- PWA -->
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#D4AF37">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 
 <link rel="stylesheet" href="./theme/theme.css">
 <link rel="stylesheet" href="./theme/layout.css">
 <link rel="stylesheet" href="./theme/components.css">
 
 <style>
+/* ================== PALETA PASSAGEIRO ================== */
 :root{
-  --gold:#D4AF37;
-  --gold-soft:#E6C97A;
-  --bg:#F6F6F6;
+  --wine:#4A1A22;
+  --wine-dark:#2B0F14;
+  --gold:#C9A24D;
+  --bg:#F7F7F7;
   --text:#333;
 }
 
-/* BASE */
+/* ================== BASE ================== */
 body{
-  background:linear-gradient(180deg,#ffffff,#f2f2f2);
+  background:
+    radial-gradient(circle at top,#ffffff 0%,#f3f3f3 65%);
   color:var(--text);
 }
 
+/* ================== LAYOUT ================== */
 .page{
   min-height:100vh;
   display:flex;
@@ -45,65 +43,72 @@ body{
   gap:22px;
 }
 
-/* CARD PRINCIPAL */
+/* ================== HERO ================== */
 .hero{
   text-align:center;
-  padding:34px 26px;
+  padding:36px 26px;
   border-radius:26px;
-  background:#fff;
-  box-shadow:0 14px 34px rgba(0,0,0,.08);
-  border:1px solid rgba(212,175,55,.35);
+  background:
+    linear-gradient(
+      135deg,
+      var(--wine-dark),
+      var(--wine)
+    );
+  color:#fff;
+  box-shadow:0 14px 34px rgba(0,0,0,.25);
 }
 
-/* MARCA */
-.brand{
-  font-size:1.9rem;
-  font-weight:800;
+.hero h1{
+  font-size:1.7rem;
   letter-spacing:2px;
-  background:linear-gradient(120deg,var(--gold),var(--gold-soft),var(--gold));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  font-weight:800;
 }
 
-.subtitle{
-  margin-top:6px;
+.hero span{
+  display:block;
+  margin-top:8px;
   font-size:.9rem;
-  color:#666;
+  opacity:.9;
 }
 
-/* TEXTO */
+/* ================== INFO ================== */
 .info{
-  margin-top:18px;
-  font-size:.95rem;
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+  text-align:center;
+}
+
+.info p{
+  font-size:.9rem;
   color:#555;
   line-height:1.5;
 }
 
-/* BOTÃO */
-.btn-primary{
-  margin-top:26px;
-  padding:18px;
+/* ================== BOTÃO PRINCIPAL ================== */
+.primary{
+  padding:20px;
   border-radius:20px;
   border:none;
-  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
-  font-size:1.05rem;
+  background:
+    linear-gradient(
+      180deg,
+      #E6C97A,
+      var(--gold)
+    );
+  font-size:1.1rem;
   font-weight:800;
   color:#000;
-  box-shadow:0 10px 22px rgba(212,175,55,.35);
+  box-shadow:0 12px 24px rgba(201,162,77,.45);
+  transition:.25s;
 }
 
-/* SEGURANÇA */
-.trust{
-  text-align:center;
-  font-size:.75rem;
-  color:#777;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin-top:6px;
+.primary:active{
+  transform:scale(.97);
 }
 
-/* RODAPÉ */
+/* ================== FOOTER ================== */
 .footer{
   text-align:center;
   font-size:.75rem;
@@ -117,32 +122,29 @@ body{
 <div class="page">
   <div class="box">
 
-    <!-- CARD -->
+    <!-- HERO -->
     <div class="hero">
-      <div class="brand">RF DRIVER</div>
-      <div class="subtitle">Simulação de valor da viagem</div>
-
-      <div class="info">
-        Consulte o valor estimado da sua corrida de forma rápida, clara e transparente.<br>
-        Sem compromisso e sem envio automático.
-      </div>
-
-      <button class="btn-primary" id="btnSimular">
-        🚖 Calcular valor da viagem
-      </button>
-
-      <div class="trust">
-        <span>🔒 Seguro</span>
-        <span>•</span>
-        <span>⭐ Transparente</span>
-        <span>•</span>
-        <span>🚗 Confiável</span>
-      </div>
+      <h1>PASSAGEIRO 5 ESTRELAS</h1>
+      <span>Simule o valor da sua viagem</span>
     </div>
+
+    <!-- INFO -->
+    <div class="info">
+      <p>
+        Aqui você pode <strong>consultar o valor estimado</strong> da sua corrida
+        com total transparência.<br><br>
+        Sem compromisso, sem envio automático.
+      </p>
+    </div>
+
+    <!-- AÇÃO -->
+    <button class="primary" onclick="iniciarSimulacao()">
+      ▶ Calcular valor da viagem
+    </button>
 
     <!-- FOOTER -->
     <div class="footer">
-      Ferramenta oficial RF Driver para passageiros
+      Conforto • Segurança • Transparência
     </div>
 
   </div>
@@ -150,10 +152,10 @@ body{
 
 <script src="core/global.js"></script>
 <script>
-document.getElementById("btnSimular").onclick = () => {
+function iniciarSimulacao(){
   App.reset();
   App.go("origem.html");
-};
+}
 </script>
 
 </body>
