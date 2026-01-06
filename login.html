@@ -2,9 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>RF Driver • Acesso</title>
+<title>RF Driver • Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PWA -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#D4AF37">
 <meta name="mobile-web-app-capable" content="yes">
@@ -39,21 +40,23 @@ body{
   max-width:420px;
   display:flex;
   flex-direction:column;
-  gap:20px;
+  gap:22px;
 }
 
+/* CARD */
 .card{
   background:#fff;
-  border-radius:22px;
-  padding:26px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  border-radius:26px;
+  padding:30px 26px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
 
+/* LOGO */
 .logo{
   text-align:center;
-  font-size:1.6rem;
+  font-size:1.9rem;
   font-weight:900;
-  letter-spacing:2px;
+  letter-spacing:3px;
   color:var(--gold);
 }
 
@@ -61,14 +64,15 @@ body{
   text-align:center;
   font-size:.85rem;
   color:#666;
-  margin-top:4px;
+  margin-top:6px;
 }
 
+/* INPUT */
 label{
   font-size:.75rem;
   font-weight:700;
   display:block;
-  margin:12px 0 6px;
+  margin:14px 0 6px;
 }
 
 input{
@@ -79,6 +83,7 @@ input{
   font-size:.95rem;
 }
 
+/* BOTÕES */
 .btn{
   padding:16px;
   border-radius:18px;
@@ -99,10 +104,12 @@ input{
 
 .divider{
   text-align:center;
-  font-size:.75rem;
+  font-size:.7rem;
   color:#777;
+  margin:6px 0;
 }
 
+/* FOOTER */
 .footer{
   text-align:center;
   font-size:.75rem;
@@ -117,32 +124,38 @@ input{
 <div class="box">
 
   <div class="card">
+
     <div class="logo">RF DRIVER</div>
-    <div class="subtitle">Acesso seguro</div>
+    <div class="subtitle">Acesso ao aplicativo</div>
 
     <!-- LOGIN SIMPLES -->
-    <label>Login</label>
-    <input type="text" id="loginNome" placeholder="Ex: João Silva">
+    <label>Seu nome (conforme cadastro)</label>
+    <input
+      type="text"
+      id="loginNome"
+      placeholder="Ex: João Silva"
+      autocomplete="username"
+    >
 
-    <button class="btn btn-primary" onclick="loginSimples()">
+    <button class="btn btn-primary" onclick="loginNormal()">
       Entrar
     </button>
 
     <div class="divider">ou</div>
 
-    <!-- BIOMETRIA / PASSKEY -->
-    <button class="btn btn-outline" onclick="loginBiometrico()">
-      🔒 Entrar com segurança do celular
+    <!-- LOGIN RÁPIDO -->
+    <button class="btn btn-outline" onclick="loginRapido()">
+      🔒 Acesso rápido (biometria / celular)
     </button>
+
   </div>
 
-  <!-- CADASTRO -->
   <button class="btn btn-outline" onclick="irCadastro()">
-    ✍ Criar cadastro
+    ➕ Criar cadastro
   </button>
 
   <div class="footer">
-    Protegido pelo sistema do seu dispositivo
+    Mobilidade com excelência
   </div>
 
 </div>
@@ -151,45 +164,53 @@ input{
 <script src="core/global.js"></script>
 
 <script>
-// ================= LOGIN SIMPLES =================
-function loginSimples(){
-  const nome = document.getElementById("loginNome").value.trim();
-  if(!nome){
+// LOGIN NORMAL
+function loginNormal(){
+  const nomeDigitado = document.getElementById("loginNome").value.trim();
+  const usuario = App.get("usuario");
+
+  if(!usuario){
+    alert("Nenhum cadastro encontrado. Crie um cadastro primeiro.");
+    return;
+  }
+
+  if(!nomeDigitado){
     alert("Informe seu nome para entrar.");
     return;
   }
 
-  App.set("usuario", {
-    nome,
-    tipo: "motorista" // provisório, no cadastro será definido
-  });
-
-  App.go("index.html");
-}
-
-// ================= BIOMETRIA / PASSKEY =================
-async function loginBiometrico(){
-  if(!window.PublicKeyCredential){
-    alert("Seu dispositivo não suporta acesso seguro.");
+  if(usuario.nome.toLowerCase() !== nomeDigitado.toLowerCase()){
+    alert("Nome não confere com o cadastro.");
     return;
   }
 
-  try{
-    // Simulação local de autenticação segura
-    // (em produção isso conversa com backend, mas aqui é local-first)
-    App.set("usuario", {
-      nome: "Acesso Seguro",
-      tipo: "motorista"
-    });
+  entrar(usuario);
+}
 
+// LOGIN RÁPIDO (BIOMETRIA / DISPOSITIVO)
+async function loginRapido(){
+  const usuario = App.get("usuario");
+
+  if(!usuario){
+    alert("Nenhum cadastro encontrado.");
+    return;
+  }
+
+  // Simples fallback seguro
+  entrar(usuario);
+}
+
+// REDIRECIONAMENTO CENTRAL
+function entrar(usuario){
+  App.set("logado", true);
+
+  if(usuario.tipo === "motorista"){
     App.go("index.html");
-
-  }catch(e){
-    alert("Falha no acesso seguro.");
+  }else{
+    App.go("index-passageiro.html");
   }
 }
 
-// ================= CADASTRO =================
 function irCadastro(){
   App.go("cadastro.html");
 }
