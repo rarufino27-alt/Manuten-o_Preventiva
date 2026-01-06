@@ -118,32 +118,33 @@ const supabaseClient = supabase.createClient(
 
 /* ================= LOGIN ================= */
 async function login(){
-  const telefone = document.getElementById("telefone").value.trim();
 
-  if(!telefone){
-    alert("Informe o telefone.");
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password: senha
+    });
+
+  if(error){
+    alert("Login inválido");
     return;
   }
 
-  const { data, error } = await supabaseClient
+  const userId = data.user.id;
+
+  // buscar tipo
+  const { data: perfil } = await supabaseClient
     .from("usuarios")
-    .select("*")
-    .eq("telefone", telefone)
-    .eq("ativo", true)
+    .select("tipo")
+    .eq("auth_id", userId)
     .single();
 
-  if(error || !data){
-    alert("Usuário não encontrado ou bloqueado.");
-    return;
-  }
-
-  // salva sessão
-  localStorage.setItem("usuarioLogado", JSON.stringify(data));
-
-  // redirecionamento por tipo
-  if(data.tipo === "motorista"){
+  if(perfil.tipo === "motorista"){
     window.location.href = "index.html";
-  }else{
+  } else {
     window.location.href = "index-passageiro.html";
   }
 }
