@@ -3,12 +3,12 @@
 /* =========================
    CONFIGURAÇÃO SUPABASE
 ========================= */
-const SUPABASE_URL = "COLE_AQUI_SEU_PROJECT_URL";
-const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_ANON_PUBLIC_KEY";
-
-const supabaseClient = supabase.createClient(
 const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
 /* =========================
