@@ -142,7 +142,7 @@ body{
     Continuar
   </button>
 
-  <button class="secondary" onclick="App.go('index.html')">
+  <button class="secondary" id="btnInicio">
     ⬅ Início
   </button>
 
@@ -156,10 +156,37 @@ body{
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/auth.js"></script>
 <script src="core/global.js"></script>
 <script src="core/datamanager.js"></script>
 
 <script>
+(async () => {
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
+  // Não cadastrado
+  if(!usuario){
+    window.location.href = "cadastro.html";
+    return;
+  }
+
+  // Bloqueio automático (admin)
+  const valido = await validarUsuarioAtivo();
+  if(!valido) return;
+
+  // Botão início conforme perfil
+  document.getElementById("btnInicio").onclick = () => {
+    if(usuario.tipo === "motorista"){
+      window.location.href = "index.html";
+    }else{
+      window.location.href = "index-passageiro.html";
+    }
+  };
+})();
+
+/* ================= LÓGICA ORIGINAL ================= */
+
 const origemBtn=document.getElementById("origemBtn");
 const modal=document.getElementById("modal");
 const lista=document.getElementById("lista");
