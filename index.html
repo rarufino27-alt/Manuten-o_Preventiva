@@ -155,7 +155,7 @@ body{
 
     <div class="secondary">
       <button class="btn btn-outline" onclick="abrirRegras()">
-        📋 Regras
+        📋 Regras do motorista
       </button>
       <a class="btn btn-outline" href="instalar-app.html">
         📲 Instalar App
@@ -178,14 +178,14 @@ document.getElementById("btnIniciar").onclick = async () => {
   const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
   if(!usuario){
-    window.location.href = "cadastro.html";
+    window.location.href = "login-motorista.html";
     return;
   }
 
   if(usuario.tipo !== "motorista"){
-  window.location.href = "index-passageiro.html";
-  return;
-}
+    window.location.href = "index-passageiro.html";
+    return;
+  }
 
   const valido = await validarUsuarioAtivo();
 
@@ -196,7 +196,7 @@ document.getElementById("btnIniciar").onclick = async () => {
 };
 
 function abrirRegras(){
-  App.go("regras.html");
+  App.go("regras-motorista.html");
 }
 </script>
 
