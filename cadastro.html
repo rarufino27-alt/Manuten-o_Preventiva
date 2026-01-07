@@ -16,7 +16,7 @@ body{
 
 .card{
   background:#fff;
-  padding:20px;
+  padding:22px;
   border-radius:18px;
   box-shadow:0 6px 20px rgba(0,0,0,.08);
   max-width:420px;
@@ -25,25 +25,34 @@ body{
 
 h1{
   text-align:center;
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
 
 select,input{
   width:100%;
-  padding:12px;
+  padding:13px;
   border-radius:12px;
   border:1px solid #ccc;
-  margin-bottom:12px;
+  margin-bottom:14px;
+  font-size:.95rem;
 }
 
 button{
   width:100%;
-  padding:14px;
+  padding:15px;
   border:none;
   border-radius:14px;
   font-weight:700;
   background:#d4af37;
   color:#000;
+  font-size:1rem;
+}
+
+.info{
+  font-size:.75rem;
+  color:#666;
+  text-align:center;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -53,20 +62,24 @@ button{
 <div class="card">
   <h1>Cadastro</h1>
 
-  <select id="tipo" onchange="toggleMotorista()">
+  <select id="tipo">
     <option value="">Quem é você?</option>
     <option value="passageiro">Passageiro</option>
     <option value="motorista">Motorista</option>
   </select>
 
   <input type="text" id="nome" placeholder="Nome completo">
-  <input type="tel" id="telefone" placeholder="Telefone">
+  <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
 
   <div id="cpfBox" style="display:none">
     <input type="text" id="cpf" placeholder="CPF do motorista">
   </div>
 
-  <button onclick="cadastrar()">Continuar</button>
+  <button id="btnCadastrar">Continuar</button>
+
+  <div class="info">
+    O cadastro é feito uma única vez neste dispositivo.
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -76,20 +89,24 @@ const supabaseClient = supabase.createClient(
   "SUA_CHAVE"
 );
 
-function toggleMotorista(){
-  const tipo = document.getElementById("tipo").value;
-  document.getElementById("cpfBox").style.display =
-    tipo === "motorista" ? "block" : "none";
-}
+const tipoEl = document.getElementById("tipo");
+const cpfBox = document.getElementById("cpfBox");
+const btnCadastrar = document.getElementById("btnCadastrar");
+
+tipoEl.addEventListener("change", () => {
+  cpfBox.style.display = tipoEl.value === "motorista" ? "block" : "none";
+});
+
+btnCadastrar.addEventListener("click", cadastrar);
 
 async function cadastrar(){
-  const tipo = document.getElementById("tipo").value;
+  const tipo = tipoEl.value;
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const cpf = document.getElementById("cpf").value.trim();
 
   if(!tipo || !nome || !telefone){
-    alert("Preencha todos os campos");
+    alert("Preencha todos os campos obrigatórios");
     return;
   }
 
@@ -99,14 +116,14 @@ async function cadastrar(){
       return;
     }
 
-    const { data } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("motoristas_autorizados")
       .select("*")
       .eq("cpf", cpf)
       .eq("ativo", true)
       .single();
 
-    if(!data){
+    if(error || !data){
       alert("Motorista não autorizado");
       return;
     }
@@ -117,12 +134,20 @@ async function cadastrar(){
     nome,
     telefone,
     cpf: tipo === "motorista" ? cpf : null,
-    criadoEm: new Date().toISOString()
+    ativo: true,
+    created_at: new Date().toISOString()
   };
 
   localStorage.setItem("usuarioRF", JSON.stringify(usuario));
 
-  await supabaseClient.from("usuarios").insert(usuario);
+  const { error: insertError } = await supabaseClient
+    .from("usuarios")
+    .insert(usuario);
+
+  if(insertError){
+    alert("Erro ao salvar cadastro");
+    return;
+  }
 
   window.location.href = "dashboard.html";
 }
