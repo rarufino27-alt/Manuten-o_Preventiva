@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Login Motorista – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+<link rel="stylesheet" href="./theme/layout.css">
+<link rel="stylesheet" href="./theme/components.css">
+
+<style>
+body{
+  background:radial-gradient(circle at top,#ffffff,#f2f2f2);
+  font-family:Inter, Arial, sans-serif;
+  color:#222;
+}
+
+.page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
+
+.card{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  border-radius:26px;
+  padding:28px 22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.logo{
+  text-align:center;
+}
+
+.logo h1{
+  font-size:1.6rem;
+  font-weight:900;
+  letter-spacing:2px;
+  background:linear-gradient(180deg,#D4AF37,#E6C97A);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.logo span{
+  font-size:.8rem;
+  color:#666;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid #ccc;
+  font-size:1rem;
+}
+
+button{
+  padding:16px;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
+  font-size:1rem;
+  font-weight:800;
+  color:#000;
+}
+
+.info{
+  font-size:.75rem;
+  color:#666;
+  text-align:center;
+}
+
+.error{
+  color:#c62828;
+  font-size:.8rem;
+  text-align:center;
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+  <div class="card">
+
+    <div class="logo">
+      <h1>RF DRIVER</h1>
+      <span>Login do motorista</span>
+    </div>
+
+    <input
+      type="tel"
+      id="cpf"
+      placeholder="Digite seu CPF"
+      maxlength="14"
+    >
+
+    <button id="btnEntrar">
+      Entrar
+    </button>
+
+    <div class="error" id="erro">
+      Motorista não autorizado
+    </div>
+
+    <div class="info">
+      Acesso exclusivo para motoristas cadastrados
+    </div>
+
+  </div>
+</div>
+
+<script src="core/motoristas.js"></script>
+
+<script>
+const cpfInput = document.getElementById("cpf");
+const btn = document.getElementById("btnEntrar");
+const erro = document.getElementById("erro");
+
+/* Máscara simples de CPF */
+cpfInput.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+
+  cpfInput.value = v;
+});
+
+btn.addEventListener("click", loginMotorista);
+
+cpfInput.addEventListener("keypress", e => {
+  if(e.key === "Enter") loginMotorista();
+});
+
+function loginMotorista(){
+  erro.style.display = "none";
+
+  const cpfDigitado = cpfInput.value;
+
+  const dados = buscarMotoristaPorCPF(cpfDigitado);
+
+  if(!dados){
+    erro.style.display = "block";
+    return;
+  }
+
+  localStorage.setItem("usuarioRF", JSON.stringify(dados));
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
