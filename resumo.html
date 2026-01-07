@@ -97,11 +97,6 @@ input[type="number"]{
   margin-bottom:8px;
 }
 
-.option.active{
-  background:rgba(212,175,55,.12);
-  border-color:#d4af37;
-}
-
 /* DETALHAMENTO */
 .details{
   font-size:.85rem;
@@ -126,6 +121,21 @@ input[type="number"]{
   font-size:2.2rem;
   font-weight:800;
   color:#d4af37;
+}
+
+/* ASSINATURA */
+.signature{
+  background:#fff;
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  font-size:.8rem;
+  color:#444;
+}
+
+.signature strong{
+  display:block;
+  margin-bottom:4px;
 }
 
 /* BOTÕES */
@@ -207,6 +217,9 @@ input[type="number"]{
     <div class="total" id="total">R$ 0,00</div>
   </div>
 
+  <!-- ASSINATURA -->
+  <div class="signature" id="assinatura"></div>
+
   <button id="btnWhats" class="btn-main">
     Enviar no WhatsApp
   </button>
@@ -218,28 +231,18 @@ input[type="number"]{
 </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/auth.js"></script>
+<script src="core/motoristas.js"></script>
 <script src="core/global.js"></script>
 <script src="core/taxas.js"></script>
 <script src="core/dinamico.js"></script>
 
 <script>
-(async () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+/* ================= USUÁRIO ================= */
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-  if(!usuario){
-    window.location.href = "cadastro.html";
-    return;
-  }
-
-  const valido = await validarUsuarioAtivo();
-  if(!valido) return;
-
-  if(usuario.tipo !== "motorista"){
-    document.getElementById("btnWhats").style.display = "none";
-  }
-})();
+if(!usuario){
+  window.location.href = "cadastro.html";
+}
 
 /* ================= DADOS ================= */
 const origem = App.get("origem");
@@ -252,6 +255,22 @@ if(!origem || !destino){
 
 origemTxt.innerText = origem;
 destinoTxt.innerText = destino;
+
+/* ================= ASSINATURA ================= */
+const assinaturaDiv = document.getElementById("assinatura");
+
+if(usuario.tipo === "motorista"){
+  assinaturaDiv.innerHTML = `
+    <strong>Motorista responsável</strong>
+    ${usuario.nome}<br>
+    Veículo: ${usuario.modelo}<br>
+    Placa: ${usuario.placa}<br>
+    CPF: ${usuario.cpfMascarado}
+  `;
+}else{
+  assinaturaDiv.style.display = "none";
+  document.getElementById("btnWhats").style.display = "none";
+}
 
 /* ================= ELEMENTOS ================= */
 const tipoViagem = document.getElementById("tipoViagem");
@@ -279,57 +298,30 @@ function calcular(){
     const acres = valorBase * (Dinamico.multiplicador - 1);
     total += acres;
     detalhes.push(["⚡ Tarifa dinâmica", acres]);
-    detalhesWhats.push(`⚡ Tarifa dinâmica: +R$ ${acres.toFixed(2)}`);
   }
 
-  const tipo = tipoViagem.value;
-
-  if(tipo === "bate_volta"){
-    const acres = valorBase * 0.8;
-    total += acres;
-    detalhes.push(["♻️ Bate e volta", acres]);
+  if(tipoViagem.value === "bate_volta"){
+    total += valorBase * 0.8;
   }
 
-  if(tipo === "ida_volta"){
-    const acres = valorBase;
-    total += acres;
-    detalhes.push(["🚕 Ida e volta", acres]);
+  if(tipoViagem.value === "ida_volta"){
+    total += valorBase;
   }
 
-  if(tipo === "ida_volta_espera"){
-    const idaVolta = valorBase * 2;
-    const acres = idaVolta * 0.1;
-    total += (idaVolta - valorBase) + acres;
-    detalhes.push(["🚕 Ida e volta", idaVolta - valorBase]);
-    detalhes.push(["⏳ Espera (10%)", acres]);
+  if(tipoViagem.value === "ida_volta_espera"){
+    total += (valorBase * 2 - valorBase) + (valorBase * 0.2);
   }
 
-  if(desvioSimples.checked){
-    total += Taxas.desvioRotaSimples;
-    detalhes.push(["🛣️ Desvio simples", Taxas.desvioRotaSimples]);
-  }
-
-  if(voltaPraia.checked){
-    total += Taxas.voltaPraia;
-    detalhes.push(["🏖️ Volta da praia", Taxas.voltaPraia]);
-  }
-
-  if(taxaFeira.checked){
-    total += Taxas.feira;
-    detalhes.push(["🧺 Taxa de feira", Taxas.feira]);
-  }
+  if(desvioSimples.checked) total += Taxas.desvioRotaSimples;
+  if(voltaPraia.checked) total += Taxas.voltaPraia;
+  if(taxaFeira.checked) total += Taxas.feira;
 
   const animal = Number(animalSel.value||0);
-  if(animal>0){
-    total += animal;
-    detalhes.push(["🐶 Transporte animal", animal]);
-  }
+  if(animal>0) total += animal;
 
   const min = Number(minutosEspera.value||0);
   if(min>=Taxas.espera.blocoMinutos){
-    const acres = Math.floor(min/Taxas.espera.blocoMinutos)*Taxas.espera.valorPorBloco;
-    total += acres;
-    detalhes.push([`⏱️ Espera (${min} min)`, acres]);
+    total += Math.floor(min/Taxas.espera.blocoMinutos)*Taxas.espera.valorPorBloco;
   }
 
   detalheDiv.innerHTML = detalhes.map(d=>`
@@ -348,10 +340,6 @@ calcular();
 
 /* ================= WHATSAPP ================= */
 btnWhats.onclick = () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-
-  if(usuario.tipo !== "motorista") return;
-
   const msg =
 `🚖 RF Driver – Recibo de viagem
 
@@ -360,7 +348,10 @@ Destino: ${destino}
 
 Total: R$ ${App.get("total").toFixed(2)}
 
-Motorista: ${usuario.nome}`;
+Motorista: ${usuario.nome}
+Veículo: ${usuario.modelo}
+Placa: ${usuario.placa}
+CPF: ${usuario.cpfMascarado}`;
 
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 };
