@@ -149,7 +149,10 @@ async function cadastrar(){
     return;
   }
 
-  window.location.href = "dashboard.html";
+if(tipo === "motorista"){
+  window.location.href = "index.html";
+}else{
+  window.location.href = "index-passageiro.html";
 }
 </script>
 
