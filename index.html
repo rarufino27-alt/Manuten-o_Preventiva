@@ -173,15 +173,12 @@ body{
 
 <script>
 // ================== CONTROLE DE ACESSO ==================
-const usuario = JSON.parse(localStorage.getItem("usuario"));
-const logado = localStorage.getItem("logado");
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-if(!usuario || !logado){
-  window.location.href = "login.html";
-}
-
-if(usuario.tipo === "passageiro"){
-  window.location.href = "index-passageiro.html";
+if(!usuario){
+  window.location.href = "cadastro.html";
+}else{
+  window.location.href = "dashboard.html";
 }
 // ========================================================
 
