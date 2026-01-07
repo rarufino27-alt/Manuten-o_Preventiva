@@ -8,10 +8,10 @@
 
 const Motoristas = [
   {
-    cpf: "12345678901", // CPF REAL (somente números)
-    nome: "João da Silva",
-    modelo: "Toyota Corolla",
-    placa: "ABC1D23",
+    cpf: "09467479460", // CPF REAL (somente números)
+    nome: "Rafael Felipe",
+    modelo: "Nissan Versa-Branco",
+    placa: "PYR-8A16",
     ativo: true
   },
   {
@@ -19,7 +19,7 @@ const Motoristas = [
     nome: "Maria Oliveira",
     modelo: "Honda Civic",
     placa: "XYZ9K88",
-    ativo: true
+    ativo: false
   }
 ];
 
