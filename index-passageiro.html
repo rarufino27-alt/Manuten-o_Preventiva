@@ -66,7 +66,7 @@ body{
   color:#555;
 }
 
-/* BOTÃO */
+/* BOTÕES */
 .btn-main{
   padding:18px;
   border-radius:20px;
@@ -75,6 +75,11 @@ body{
   font-size:1.05rem;
   font-weight:800;
   color:#000;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
 }
 
 /* FOOTER */
@@ -105,10 +110,19 @@ body{
       </p>
     </div>
 
-    <!-- AÇÃO -->
+    <!-- AÇÕES -->
     <button class="btn-main" id="btnIniciar">
       ▶ Consultar valor da corrida
     </button>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="abrirRegras()">
+        📋 Regras do passageiro
+      </button>
+      <a class="btn btn-outline" href="instalar-app.html">
+        📲 Instalar App
+      </a>
+    </div>
 
     <!-- FOOTER -->
     <div class="footer">
@@ -137,7 +151,7 @@ body{
     return;
   }
 
-  // Bloqueio automático (admin)
+  // Bloqueio automático
   const valido = await validarUsuarioAtivo();
   if(!valido) return;
 })();
@@ -149,6 +163,10 @@ document.getElementById("btnIniciar").onclick = () => {
 
   window.location.href = "origem.html";
 };
+
+function abrirRegras(){
+  window.location.href = "regras-passageiro.html";
+}
 </script>
 
 </body>
