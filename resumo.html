@@ -153,13 +153,11 @@ input[type="number"]{
 <div class="page">
 <div class="container">
 
-  <!-- HEADER -->
   <div class="header">
     <h1>Resumo da corrida</h1>
     <span>Valores detalhados</span>
   </div>
 
-  <!-- ROTA -->
   <div class="route">
     <strong>📌 Origem</strong><br>
     <span id="origemTxt"></span>
@@ -168,7 +166,6 @@ input[type="number"]{
     <span id="destinoTxt"></span>
   </div>
 
-  <!-- TIPO DE VIAGEM -->
   <div class="block">
     <label>🚖 Tipo de viagem</label>
     <select id="tipoViagem">
@@ -179,14 +176,12 @@ input[type="number"]{
     </select>
   </div>
 
-  <!-- TAXAS -->
   <div class="block">
     <div class="option"><span>🛣️ Desvio simples</span><input type="checkbox" id="desvioSimples"></div>
     <div class="option"><span>🏖️ Volta da praia</span><input type="checkbox" id="voltaPraia"></div>
     <div class="option"><span>🧺 Taxa de feira</span><input type="checkbox" id="taxaFeira"></div>
   </div>
 
-  <!-- ANIMAL -->
   <div class="block">
     <label>🐶 Transporte de animal</label>
     <select id="animal">
@@ -198,25 +193,21 @@ input[type="number"]{
     </select>
   </div>
 
-  <!-- ESPERA -->
   <div class="block">
     <label>⏱️ Tempo de espera (min)</label>
     <input type="number" id="minutosEspera" placeholder="Ex: 10">
   </div>
 
-  <!-- DETALHAMENTO -->
   <div class="block">
     <strong>Detalhamento</strong>
     <div class="details" id="detalhamento"></div>
   </div>
 
-  <!-- TOTAL -->
   <div class="totalBox">
     <div class="total" id="total">R$ 0,00</div>
   </div>
 
-  <!-- BOTÃO WHATSAPP (SÓ MOTORISTA) -->
-  <button id="btnWhats" class="btn-main" onclick="enviarWhats()">
+  <button id="btnWhats" class="btn-main">
     Enviar no WhatsApp
   </button>
 
@@ -227,27 +218,37 @@ input[type="number"]{
 </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/auth.js"></script>
 <script src="core/global.js"></script>
 <script src="core/taxas.js"></script>
 <script src="core/dinamico.js"></script>
 
 <script>
-/* ================= USUÁRIO ================= */
-const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+(async () => {
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-if(!usuario){
-  window.location.href = "login.html";
-}
+  if(!usuario){
+    window.location.href = "cadastro.html";
+    return;
+  }
 
-// passageiro NÃO pode enviar WhatsApp
-if(usuario.tipo !== "motorista"){
-  document.getElementById("btnWhats").style.display = "none";
-}
+  const valido = await validarUsuarioAtivo();
+  if(!valido) return;
+
+  if(usuario.tipo !== "motorista"){
+    document.getElementById("btnWhats").style.display = "none";
+  }
+})();
 
 /* ================= DADOS ================= */
 const origem = App.get("origem");
 const destino = App.get("destino");
 const valorBase = Number(App.get("valorBase") || 0);
+
+if(!origem || !destino){
+  App.go("index.html");
+}
 
 origemTxt.innerText = origem;
 destinoTxt.innerText = destino;
@@ -261,6 +262,7 @@ const animalSel = document.getElementById("animal");
 const minutosEspera = document.getElementById("minutosEspera");
 const detalheDiv = document.getElementById("detalhamento");
 const totalDiv = document.getElementById("total");
+const btnWhats = document.getElementById("btnWhats");
 
 let detalhesWhats = [];
 
@@ -271,13 +273,13 @@ function calcular(){
   detalhesWhats = [];
 
   detalhes.push(["🚖 Viagem base", valorBase]);
-  detalhesWhats.push(`🚖 *Viagem base*: R$ ${valorBase.toFixed(2)}`);
+  detalhesWhats.push(`🚖 Viagem base: R$ ${valorBase.toFixed(2)}`);
 
   if(Dinamico?.ativo){
     const acres = valorBase * (Dinamico.multiplicador - 1);
     total += acres;
     detalhes.push(["⚡ Tarifa dinâmica", acres]);
-    detalhesWhats.push(`⚡ *Tarifa dinâmica*: +R$ ${acres.toFixed(2)}`);
+    detalhesWhats.push(`⚡ Tarifa dinâmica: +R$ ${acres.toFixed(2)}`);
   }
 
   const tipo = tipoViagem.value;
@@ -345,94 +347,24 @@ document.querySelectorAll("select,input").forEach(el=>{
 calcular();
 
 /* ================= WHATSAPP ================= */
-function enviarWhats(){
+btnWhats.onclick = () => {
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
+  if(usuario.tipo !== "motorista") return;
+
   const msg =
-`🚖 *RF Driver – Recibo de viagem*
+`🚖 RF Driver – Recibo de viagem
 
-📌 *Origem*: ${origem}
-🏁 *Destino*: ${destino}
+Origem: ${origem}
+Destino: ${destino}
 
-*Detalhamento*
-${detalhesWhats.join("\n")}
+Total: R$ ${App.get("total").toFixed(2)}
 
-💰 *Total*: R$ ${App.get("total").toFixed(2)}
-
-Motorista: ${usuario.nome}
-Veículo: ${usuario.modelo || "-"} | Placa: ${usuario.placa || "-"}`;
+Motorista: ${usuario.nome}`;
 
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
-}
+};
 </script>
 
-<script>
-async function gerarPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
-
-  let y = 20;
-
-  // TÍTULO
-  doc.setFontSize(16);
-  doc.text("RF Driver – Recibo de Viagem", 105, y, { align: "center" });
-
-  y += 10;
-  doc.setFontSize(10);
-  doc.text("Documento gerado automaticamente", 105, y, { align: "center" });
-
-  y += 12;
-  doc.line(20, y, 190, y);
-  y += 10;
-
-  // ROTA
-  doc.setFontSize(12);
-  doc.text(`Origem: ${origem}`, 20, y); y += 7;
-  doc.text(`Destino: ${destino}`, 20, y); y += 10;
-
-  // DETALHAMENTO
-  doc.setFontSize(11);
-  doc.text("Detalhamento da viagem:", 20, y);
-  y += 8;
-
-  detalhesWhats.forEach(item=>{
-    doc.text(item.replace(/\*/g,""), 24, y);
-    y += 6;
-  });
-
-  y += 6;
-  doc.line(20, y, 190, y);
-  y += 10;
-
-  // TOTAL
-  doc.setFontSize(14);
-  doc.text(`Total: R$ ${App.get("total").toFixed(2)}`, 20, y);
-
-  y += 20;
-
-  // ASSINATURA AUTOMÁTICA
-  doc.setFontSize(10);
-  doc.text("Motorista responsável:", 20, y); y += 6;
-
-  doc.setFontSize(12);
-  doc.text(usuario.nome, 20, y); y += 6;
-
-  doc.setFontSize(10);
-  doc.text(`Veículo: ${usuario.modelo || "-"}`, 20, y); y += 5;
-  doc.text(`Placa: ${usuario.placa || "-"}`, 20, y); y += 8;
-
-  doc.setFontSize(9);
-  doc.text("Assinatura digital automática • RF Driver", 20, y);
-
-  y += 15;
-  doc.setFontSize(8);
-  doc.text(
-    "Este recibo foi gerado automaticamente pelo aplicativo RF Driver.",
-    105,
-    y,
-    { align: "center" }
-  );
-
-  doc.save(`recibo-rf-driver-${Date.now()}.pdf`);
-}
-</script>
 </body>
 </html>
