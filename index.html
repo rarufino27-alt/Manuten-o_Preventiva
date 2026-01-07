@@ -172,19 +172,15 @@ body{
 <script src="core/global.js"></script>
 
 <script>
-// ================== CONTROLE DE ACESSO ==================
-const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-
-if(!usuario){
-  window.location.href = "cadastro.html";
-}else{
-  window.location.href = "dashboard.html";
-}
-// ========================================================
-
 document.getElementById("btnIniciar").onclick = () => {
-  App.reset();
-  App.go("origem.html");
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
+  if(!usuario){
+    window.location.href = "cadastro.html";
+  }else{
+    App.reset();
+    App.go("origem.html");
+  }
 };
 
 function abrirRegras(){
