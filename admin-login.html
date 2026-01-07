@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Login Admin – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+
+<style>
+body{
+  background:#111;
+  color:#fff;
+  font-family:Inter, Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#1c1c1c;
+  padding:24px;
+  border-radius:16px;
+  width:100%;
+  max-width:360px;
+  box-shadow:0 10px 30px rgba(0,0,0,.6);
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  margin-bottom:12px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  background:#d4af37;
+  color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Admin</h1>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="senha" placeholder="Senha">
+
+  <button onclick="login()">Entrar</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = supabase.createClient(
+  "SUA_URL",
+  "SUA_CHAVE"
+);
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){
+    alert("Preencha todos os campos");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("admins")
+    .select("*")
+    .eq("email", email)
+    .eq("senha", senha)
+    .eq("ativo", true)
+    .single();
+
+  if(error || !data){
+    alert("Acesso negado");
+    return;
+  }
+
+  localStorage.setItem("adminLogado", JSON.stringify(data));
+  window.location.href = "admin.html";
+}
+</script>
+
+</body>
+</html>
