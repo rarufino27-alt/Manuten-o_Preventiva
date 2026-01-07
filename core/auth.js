@@ -16,31 +16,26 @@ const supabaseClient = supabase.createClient(
  * ainda está ativo no sistema (bloqueio automático)
  */
 async function validarUsuarioAtivo(){
-  const usuarioLocal = JSON.parse(localStorage.getItem("usuarioRF"));
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-  // Não existe usuário no dispositivo
-  if(!usuarioLocal){
+  if(!usuario){
     window.location.href = "cadastro.html";
     return false;
   }
 
-  let query = supabaseClient
+  // 🔐 MOTORISTA: valida SOMENTE local
+  if(usuario.tipo === "motorista"){
+    return true;
+  }
+
+  // 👤 PASSAGEIRO: valida via Supabase
+  const { data, error } = await supabaseClient
     .from("usuarios")
-    .select("id, ativo")
-    .eq("ativo", true);
+    .select("*")
+    .eq("telefone", usuario.telefone)
+    .eq("ativo", true)
+    .single();
 
-  // Motorista valida por CPF
-  if(usuarioLocal.tipo === "motorista"){
-    query = query.eq("cpf", usuarioLocal.cpf);
-  }
-  // Passageiro valida por telefone
-  else{
-    query = query.eq("telefone", usuarioLocal.telefone);
-  }
-
-  const { data, error } = await query.single();
-
-  // Usuário bloqueado, excluído ou inválido
   if(error || !data){
     alert("Acesso bloqueado. Entre em contato com o suporte.");
     localStorage.removeItem("usuarioRF");
@@ -48,6 +43,6 @@ async function validarUsuarioAtivo(){
     return false;
   }
 
-  // Usuário válido
   return true;
 }
+
