@@ -106,7 +106,7 @@ body{
     </div>
 
     <!-- AÇÃO -->
-    <button class="btn-main" onclick="iniciar()">
+    <button class="btn-main" id="btnIniciar">
       ▶ Consultar valor da corrida
     </button>
 
@@ -118,21 +118,37 @@ body{
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/auth.js"></script>
+
 <script>
-/* ================= PROTEÇÃO ================= */
-const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+(async () => {
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-if(!usuario || usuario.tipo !== "passageiro"){
-  window.location.href = "login.html";
-}
+  // Não cadastrado
+  if(!usuario){
+    window.location.href = "cadastro.html";
+    return;
+  }
 
-/* ================= FLUXO ================= */
-function iniciar(){
+  // Tipo errado
+  if(usuario.tipo !== "passageiro"){
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Bloqueio automático (admin)
+  const valido = await validarUsuarioAtivo();
+  if(!valido) return;
+})();
+
+document.getElementById("btnIniciar").onclick = () => {
   localStorage.removeItem("origem");
   localStorage.removeItem("destino");
   localStorage.removeItem("valorBase");
+
   window.location.href = "origem.html";
-}
+};
 </script>
 
 </body>
