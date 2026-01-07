@@ -170,14 +170,21 @@ body{
 </div>
 
 <script src="core/global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/auth.js"></script>
 
 <script>
-document.getElementById("btnIniciar").onclick = () => {
+document.getElementById("btnIniciar").onclick = async () => {
   const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
   if(!usuario){
     window.location.href = "cadastro.html";
-  }else{
+    return;
+  }
+
+  const valido = await validarUsuarioAtivo();
+
+  if(valido){
     App.reset();
     App.go("origem.html");
   }
