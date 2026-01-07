@@ -74,6 +74,12 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const admin = JSON.parse(localStorage.getItem("adminLogado"));
+
+if(!admin){
+  window.location.href = "admin-login.html";
+}
+
 const supabaseClient = supabase.createClient(
   "SUA_URL",
   "SUA_CHAVE"
