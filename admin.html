@@ -2,73 +2,81 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Admin – RF Driver</title>
+<title>Painel Admin – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
 
 <style>
 body{
-  background:#f4f4f4;
-  font-family:Arial, sans-serif;
+  background:#f2f2f2;
+  font-family:Inter, Arial, sans-serif;
   padding:16px;
 }
 
 h1{
   text-align:center;
-  margin-bottom:16px;
+  margin-bottom:20px;
 }
 
 .card{
   background:#fff;
-  border-radius:14px;
+  border-radius:16px;
   padding:14px;
   margin-bottom:12px;
-  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .badge{
-  display:inline-block;
-  padding:4px 8px;
-  border-radius:10px;
+  padding:4px 10px;
+  border-radius:12px;
   font-size:.7rem;
   font-weight:700;
 }
 
 .motorista{background:#d4af37;color:#000}
-.passageiro{background:#ccc;color:#000}
+.passageiro{background:#e0e0e0;color:#000}
 
-.ativo{color:green;font-weight:700}
-.bloqueado{color:red;font-weight:700}
+.ativo{color:#2e7d32;font-weight:700}
+.bloqueado{color:#c62828;font-weight:700}
+
+.actions{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+}
 
 button{
-  margin-top:8px;
-  width:100%;
+  flex:1;
   padding:10px;
-  border-radius:12px;
   border:none;
+  border-radius:12px;
   font-weight:700;
 }
 
 .btn-bloquear{background:#ff5c5c;color:#fff}
 .btn-ativar{background:#4caf50;color:#fff}
+.btn-excluir{background:#111;color:#fff}
 </style>
 </head>
 
 <body>
 
-<h1>📋 Admin – Usuários</h1>
+<h1>Painel Administrativo</h1>
 
 <div id="lista"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
-const SUPABASE_ANON_KEY = "COLE_AQUI_A_MESMA_CHAVE_QUE_JÁ_USA";
-
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "SUA_URL",
+  "SUA_CHAVE"
 );
 
 async function carregarUsuarios(){
@@ -90,29 +98,31 @@ async function carregarUsuarios(){
     div.className = "card";
 
     div.innerHTML = `
-      <div>
-        <strong>${u.nome}</strong><br>
-        📞 ${u.telefone}<br>
-        <span class="badge ${u.tipo}">
-          ${u.tipo.toUpperCase()}
-        </span>
+      <div class="header">
+        <strong>${u.nome}</strong>
+        <span class="badge ${u.tipo}">${u.tipo.toUpperCase()}</span>
       </div>
 
-      ${u.tipo==="motorista" ? `
-        <div>🚗 ${u.modelo || "-"} | ${u.placa || "-"}</div>
-      ` : ""}
+      <div>📞 ${u.telefone || "-"}</div>
+      ${u.cpf ? `<div>🪪 CPF: ${u.cpf}</div>` : ""}
 
-      <div>
-        Status:
+      <div>Status:
         <span class="${u.ativo ? "ativo":"bloqueado"}">
           ${u.ativo ? "ATIVO":"BLOQUEADO"}
         </span>
       </div>
 
-      <button class="${u.ativo ? "btn-bloquear":"btn-ativar"}"
-        onclick="alterarStatus('${u.id}',${!u.ativo})">
-        ${u.ativo ? "Bloquear":"Ativar"}
-      </button>
+      <div class="actions">
+        <button class="${u.ativo ? "btn-bloquear":"btn-ativar"}"
+          onclick="alterarStatus('${u.id}',${!u.ativo})">
+          ${u.ativo ? "Bloquear":"Ativar"}
+        </button>
+
+        <button class="btn-excluir"
+          onclick="excluirUsuario('${u.id}')">
+          Excluir
+        </button>
+      </div>
     `;
 
     lista.appendChild(div);
@@ -120,15 +130,19 @@ async function carregarUsuarios(){
 }
 
 async function alterarStatus(id,ativo){
-  const { error } = await supabaseClient
-    .from("usuarios")
+  await supabaseClient.from("usuarios")
     .update({ ativo })
     .eq("id", id);
 
-  if(error){
-    alert("Erro ao alterar status");
-    return;
-  }
+  carregarUsuarios();
+}
+
+async function excluirUsuario(id){
+  if(!confirm("Excluir este usuário definitivamente?")) return;
+
+  await supabaseClient.from("usuarios")
+    .delete()
+    .eq("id", id);
 
   carregarUsuarios();
 }
