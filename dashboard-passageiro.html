@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
 body{
@@ -75,6 +73,7 @@ body{
   font-size:1.05rem;
   font-weight:800;
   color:#000;
+  cursor:pointer;
 }
 
 .actions{
@@ -82,7 +81,6 @@ body{
   gap:12px;
 }
 
-/* FOOTER */
 .footer{
   text-align:center;
   font-size:.75rem;
@@ -110,11 +108,12 @@ body{
       </p>
     </div>
 
-    <!-- AÇÕES -->
+    <!-- AÇÃO PRINCIPAL -->
     <button class="btn-main" id="btnIniciar">
       ▶ Consultar valor da corrida
     </button>
 
+    <!-- AÇÕES SECUNDÁRIAS -->
     <div class="actions">
       <button class="btn btn-outline" onclick="abrirRegras()">
         📋 Regras do passageiro
@@ -132,29 +131,22 @@ body{
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/auth.js"></script>
-
 <script>
-(async () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+/* ================= PROTEÇÃO DE ACESSO ================= */
 
-  // Não cadastrado
-  if(!usuario){
-    window.location.href = "cadastro.html";
-    return;
-  }
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-  // Tipo errado
-  if(usuario.tipo !== "passageiro"){
-    window.location.href = "index.html";
-    return;
-  }
+// Não logado → volta para index neutra
+if(!usuario){
+  window.location.href = "index.html";
+}
 
-  // Bloqueio automático
-  const valido = await validarUsuarioAtivo();
-  if(!valido) return;
-})();
+// Tipo errado → volta para index neutra
+if(usuario.tipo !== "passageiro"){
+  window.location.href = "index.html";
+}
+
+/* ================= AÇÕES ================= */
 
 document.getElementById("btnIniciar").onclick = () => {
   localStorage.removeItem("origem");
