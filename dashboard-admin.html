@@ -11,75 +11,40 @@
 body{
   background:linear-gradient(180deg,#ffffff,#f3f3f3);
   font-family:Inter, Arial, sans-serif;
-  color:#222;
 }
-
 .page{
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:20px;
 }
-
 .box{
-  width:100%;
-  max-width:420px;
   background:#fff;
+  padding:30px;
   border-radius:26px;
-  padding:30px 24px;
   box-shadow:0 14px 36px rgba(0,0,0,.12);
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-.header{
+  max-width:420px;
+  width:100%;
   text-align:center;
 }
-
-.header h1{
-  font-size:1.6rem;
-  font-weight:900;
+h1{
   color:#000;
 }
-
-.header span{
-  font-size:.85rem;
-  color:#666;
-}
-
-.card{
-  background:#f9f9f9;
-  border-radius:18px;
-  padding:18px;
-  font-size:.9rem;
-  color:#444;
-}
-
-.btn{
+button{
+  margin-top:14px;
   padding:16px;
+  width:100%;
   border-radius:18px;
   border:none;
-  font-size:1rem;
   font-weight:800;
-  cursor:pointer;
 }
-
-.btn-admin{
+.admin{
   background:#111;
   color:#fff;
 }
-
-.btn-outline{
+.out{
   background:#fff;
   border:1px solid #ccc;
-}
-
-.footer{
-  text-align:center;
-  font-size:.75rem;
-  color:#777;
 }
 </style>
 </head>
@@ -89,60 +54,36 @@ body{
 <div class="page">
   <div class="box">
 
-    <div class="header">
-      <h1>ADMINISTRADOR</h1>
-      <span>Dashboard administrativo</span>
-    </div>
+    <h1>ADMINISTRADOR</h1>
+    <p id="nome"></p>
 
-    <div class="card">
-      Você está logado como <strong>Administrador</strong>.<br>
-      A partir daqui você tem acesso total ao controle do aplicativo.
-    </div>
-
-    <button class="btn btn-admin" onclick="abrirPainel()">
-      🛠️ Acessar Painel Administrativo
+    <button class="admin" onclick="abrirPainel()">
+      🛠️ Painel Administrativo
     </button>
 
-    <button class="btn btn-outline" onclick="voltarApp()">
-      🚗 Voltar ao App
-    </button>
-
-    <button class="btn btn-outline" onclick="logoutAdmin()">
+    <button class="out" onclick="sair()">
       🔒 Sair
     </button>
-
-    <div class="footer">
-      RF Driver • Administração do sistema
-    </div>
 
   </div>
 </div>
 
 <script>
-/* ================= PROTEÇÃO ================= */
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-// 🔒 ADMIN NÃO PODE CONVIVER COM usuarioRF
-localStorage.removeItem("usuarioRF");
-
-const admin = JSON.parse(localStorage.getItem("adminRF"));
-
-if(!admin || admin.tipo !== "admin"){
-  localStorage.removeItem("adminRF");
-  window.location.href = "admin-login.html";
+if(!usuario || usuario.tipo !== "admin"){
+  localStorage.clear();
+  window.location.href = "index.html";
 }
 
-/* ================= AÇÕES ================= */
+document.getElementById("nome").innerText = usuario.nome;
 
 function abrirPainel(){
   window.location.href = "admin-painel.html";
 }
 
-function voltarApp(){
-  window.location.href = "index.html";
-}
-
-function logoutAdmin(){
-  localStorage.removeItem("adminRF");
+function sair(){
+  localStorage.clear();
   window.location.href = "index.html";
 }
 </script>
