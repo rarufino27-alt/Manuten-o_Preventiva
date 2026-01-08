@@ -15,36 +15,38 @@ body{
 .page{
   min-height:100vh;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  padding:22px;
 }
 .card{
-  background:#fff;
-  padding:28px;
-  border-radius:24px;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
   width:100%;
-  max-width:360px;
+  max-width:380px;
+  background:#fff;
+  border-radius:26px;
+  padding:28px 22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 h1{text-align:center}
 input{
   width:100%;
   padding:14px;
-  border-radius:14px;
+  border-radius:16px;
   border:1px solid #ccc;
-  margin-bottom:14px;
 }
 button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
+  padding:16px;
+  border-radius:18px;
   border:none;
-  background:#D4AF37;
+  background:#d4af37;
   font-weight:800;
 }
 .error{
-  font-size:.8rem;
   color:#c62828;
+  font-size:.8rem;
   text-align:center;
   display:none;
 }
@@ -58,10 +60,10 @@ button{
 
     <h1>ADMIN</h1>
 
-    <input id="cpf" placeholder="CPF do administrador" maxlength="14">
+    <input id="cpf" placeholder="CPF do administrador">
     <button id="btnEntrar">Entrar</button>
 
-    <div class="error" id="erro">Acesso não autorizado</div>
+    <div class="error" id="erro">Admin não autorizado</div>
 
   </div>
 </div>
@@ -75,21 +77,10 @@ const supabaseClient = supabase.createClient(
 
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-const cpfInput = document.getElementById("cpf");
-const erro = document.getElementById("erro");
-
-cpfInput.addEventListener("input", ()=>{
-  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  cpfInput.value = v;
-});
-
-document.getElementById("btnEntrar").onclick = async ()=>{
-  erro.style.display="none";
-
-  const cpf = cpfInput.value.replace(/\D/g,"");
+document.getElementById("btnEntrar").onclick = async () => {
+  const cpf = document.getElementById("cpf").value.replace(/\D/g,"");
+  const erro = document.getElementById("erro");
+  erro.style.display = "none";
 
   const { data, error } = await supabaseClient
     .from("usuarios")
@@ -101,17 +92,11 @@ document.getElementById("btnEntrar").onclick = async ()=>{
     .single();
 
   if(error || !data){
-    erro.style.display="block";
+    erro.style.display = "block";
     return;
   }
 
-  localStorage.setItem("usuarioRF", JSON.stringify({
-    tipo:"admin",
-    nome:data.nome,
-    id:data.id,
-    grupo_id:data.grupo_id
-  }));
-
+  localStorage.setItem("usuarioRF", JSON.stringify(data));
   window.location.href = "dashboard-admin.html";
 };
 </script>
