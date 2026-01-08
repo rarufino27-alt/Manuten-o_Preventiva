@@ -86,19 +86,11 @@ button:active{
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+  "SUA_CHAVE_PUBLICA_AQUI"
 );
 </script>
 
 <script>
-/* ================= PROTEÇÃO ================= */
-
-// Se QUALQUER usuário já estiver logado, volta para index
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado){
-  window.location.href = "index.html";
-}
-
 /* ================= ELEMENTOS ================= */
 
 const nomeInput = document.getElementById("nome");
@@ -131,7 +123,7 @@ async function cadastrar(){
   }
 
   // 🔎 Verifica se CPF já existe
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("usuarios")
     .select("id")
     .eq("cpf", cpf)
@@ -153,17 +145,16 @@ async function cadastrar(){
     created_at: new Date().toISOString()
   };
 
-  const { error: insertError } = await supabaseClient
+  const { error } = await supabaseClient
     .from("usuarios")
     .insert(usuario);
 
-  if(insertError){
+  if(error){
     alert("Erro ao salvar cadastro");
     return;
   }
 
   localStorage.setItem("usuarioRF", JSON.stringify(usuario));
-
   window.location.href = "dashboard-passageiro.html";
 }
 </script>
