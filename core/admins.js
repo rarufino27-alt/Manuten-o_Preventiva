@@ -25,9 +25,9 @@ function buscarAdmin(usuario, senha){
   if(!admin) return null;
 
   return {
+    tipo: "admin"
     nome: admin.nome,
     usuario: admin.usuario,
-    tipo: "admin"
   };
 }
 
