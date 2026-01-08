@@ -37,8 +37,8 @@ input,select{width:100%;padding:12px;border-radius:14px;border:1px solid #ccc}
   <div class="header"><h1>Resumo da corrida</h1></div>
 
   <div class="route">
-    <strong>📌 Origem</strong><br><span id="origemTxt"></span><br><br>
-    <strong>🏁 Destino</strong><br><span id="destinoTxt"></span>
+    <strong>📌🏁 Origem ou Destino</strong><br><span id="origemTxt"></span><br><br>
+    <strong>🏁📌 Destino ou Origem</strong><br><span id="destinoTxt"></span>
   </div>
 
   <div class="block">
@@ -201,8 +201,8 @@ btnWhats.onclick = () => {
   const msg =
 `*🚖 RF DRIVER – RECIBO de Viagem*
 
-*Origem:* ${origem}
-*Destino:* ${destino}
+*📌Origem/Destino:* ${origem}
+*🏁Destino/Origem:* ${destino}
 
 ${window.__detalhesWhats.join("\n")}
 
