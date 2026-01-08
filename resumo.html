@@ -187,20 +187,33 @@ function calcular(){
 document.querySelectorAll("input,select").forEach(e=>e.addEventListener("change",calcular));
 calcular();
 
-btnWhats.onclick = ()=>{
+btnWhats.onclick = () => {
+  const total = App.get("total");
+
+  const assinaturaTexto =
+    usuario.tipo === "admin"
+      ? `ADMINISTRADOR ${usuario.nome}`
+      : `MOTORISTA ${usuario.nome}
+Veículo: ${usuario.modelo}
+Placa: ${usuario.placa}
+CPF: ${usuario.cpfMascarado}`;
+
   const msg =
 `🚖 RF DRIVER – RECIBO de Viagem
 
-*Origem:* ${origem}
-*Destino:* ${destino}
+📌Origem: ${origem}
+🏁Destino: ${destino}
 
-*${window.__detalhesWhats.join("\n")}
+${window.__detalhesWhats.join("\n")}
 
-*Total:* R$ ${App.get("total").toFixed(2)}
+Total: R$ ${total.toFixed(2)}
 
-*${assinatura.innerText}`;
+${assinaturaTexto}`;
 
-  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+  window.open(
+    "https://wa.me/?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
 };
 </script>
 
