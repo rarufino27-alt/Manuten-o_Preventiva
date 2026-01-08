@@ -1,6 +1,7 @@
 /**
  * CENTRAL DE ADMINS AUTORIZADOS
  * Acesso total ao painel administrativo
+ * Cadastro manual (igual motorista)
  */
 
 const Admins = [
@@ -14,6 +15,7 @@ const Admins = [
 
 /**
  * Busca admin válido
+ * Retorna dados mínimos para sessão
  */
 function buscarAdmin(usuario, senha){
   const admin = Admins.find(a =>
@@ -25,9 +27,9 @@ function buscarAdmin(usuario, senha){
   if(!admin) return null;
 
   return {
-    tipo: "admin"
+    tipo: "admin",
     nome: admin.nome,
-    usuario: admin.usuario,
+    usuario: admin.usuario
   };
 }
 
