@@ -74,6 +74,11 @@ button{
   font-size:1rem;
   font-weight:800;
   color:#000;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.98);
 }
 
 .info{
@@ -106,6 +111,7 @@ button{
       id="cpf"
       placeholder="Digite seu CPF"
       maxlength="14"
+      autocomplete="off"
     >
 
     <button id="btnEntrar">
@@ -133,11 +139,22 @@ const supabaseClient = supabase.createClient(
 </script>
 
 <script>
+/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+
+const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
+
+if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
+  window.location.href = "dashboard-passageiro.html";
+}
+
+/* ================= ELEMENTOS ================= */
+
 const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnEntrar");
 const erro = document.getElementById("erro");
 
-/* Máscara simples de CPF */
+/* ================= MÁSCARA CPF ================= */
+
 cpfInput.addEventListener("input", () => {
   let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
   v = v.replace(/(\d{3})(\d)/,"$1.$2");
@@ -146,11 +163,15 @@ cpfInput.addEventListener("input", () => {
   cpfInput.value = v;
 });
 
+/* ================= EVENTOS ================= */
+
 btn.addEventListener("click", loginPassageiro);
 
 cpfInput.addEventListener("keypress", e => {
   if(e.key === "Enter") loginPassageiro();
 });
+
+/* ================= LOGIN ================= */
 
 async function loginPassageiro(){
   erro.style.display = "none";
@@ -185,7 +206,7 @@ async function loginPassageiro(){
 
   localStorage.setItem("usuarioRF", JSON.stringify(usuario));
 
-  window.location.href = "index-passageiro.html";
+  window.location.href = "dashboard-passageiro.html";
 }
 </script>
 
