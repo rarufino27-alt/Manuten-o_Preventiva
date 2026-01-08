@@ -2,42 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>RF Driver – Motorista</title>
+<title>Bem-vindo – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWA -->
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#D4AF37">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="RF Driver">
-<link rel="apple-touch-icon" href="./icons/192.png">
-
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
-:root{
-  --gold:#D4AF37;
-  --gold-soft:#E6C97A;
-  --text:#444;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(18px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-@keyframes shine{
-  0%{background-position:-200%}
-  100%{background-position:200%}
-}
-
 body{
   background:radial-gradient(circle at top,#ffffff,#f2f2f2);
-  color:var(--text);
+  font-family:Inter, Arial, sans-serif;
+  color:#222;
 }
 
 .page{
@@ -45,57 +19,78 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:22px;
+  padding:20px;
 }
 
 .box{
   width:100%;
   max-width:420px;
+  background:#fff;
+  border-radius:28px;
+  padding:30px 24px;
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
   display:flex;
   flex-direction:column;
-  gap:22px;
+  gap:20px;
 }
 
-.hero{
+h1{
   text-align:center;
-  padding:34px 26px;
-  border-radius:26px;
-  background:#fff;
-  border:1px solid rgba(212,175,55,.35);
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
-  animation:fadeUp .6s ease;
-}
-
-.hero-title{
-  font-size:1.9rem;
+  font-size:1.6rem;
   font-weight:900;
-  letter-spacing:2px;
-  background:linear-gradient(120deg,var(--gold),var(--gold-soft),var(--gold));
-  background-size:200% auto;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  animation:shine 6s linear infinite;
+  color:#000;
 }
 
-.hero-sub{
-  margin-top:6px;
-  font-size:.9rem;
+.subtitle{
+  text-align:center;
+  font-size:.85rem;
   color:#666;
 }
 
-.primary-action{
-  padding:18px;
-  font-size:1.05rem;
-  font-weight:800;
+/* BLOCOS */
+.group{
   border-radius:18px;
-  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
-  color:#000;
-  border:none;
+  padding:16px;
+  background:#f9f9f9;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.secondary{
-  display:flex;
-  gap:12px;
+.group-title{
+  font-weight:800;
+  font-size:.9rem;
+  color:#000;
+}
+
+/* BOTÕES */
+.btn{
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  font-size:.95rem;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.btn-passageiro{
+  background:#d4af37;
+  color:#000;
+}
+
+.btn-outline{
+  background:#fff;
+  border:1px solid #ccc;
+}
+
+.btn-motorista{
+  background:#111;
+  color:#fff;
+}
+
+.btn-admin{
+  background:#e0e0e0;
+  color:#000;
 }
 
 .footer{
@@ -111,74 +106,66 @@ body{
 <div class="page">
   <div class="box">
 
-    <div class="hero">
-      <div class="hero-title">RF DRIVER</div>
-      <div class="hero-sub">Dashboard do motorista</div>
+    <h1>Bem-vindo ao RF Driver</h1>
+    <div class="subtitle">
+      Escolha como deseja acessar o aplicativo
     </div>
 
-    <button class="btn primary-action" id="btnIniciar">
-      ▶ Iniciar cálculo de corrida
-    </button>
+    <!-- PASSAGEIRO -->
+    <div class="group">
+      <div class="group-title">🚶 Passageiro</div>
 
-    <div class="secondary">
-      <button class="btn btn-outline" onclick="abrirRegras()">
-        📋 Regras do motorista
+      <button class="btn btn-passageiro" onclick="passageiroCadastrado()">
+        Já sou cadastrado
       </button>
-      <a class="btn btn-outline" href="instalar-app.html">
-        📲 Instalar App
-      </a>
+
+      <button class="btn btn-outline" onclick="passageiroNovo()">
+        Sou passageiro novo
+      </button>
+    </div>
+
+    <!-- MOTORISTA -->
+    <div class="group">
+      <div class="group-title">🚗 Motorista</div>
+
+      <button class="btn btn-motorista" onclick="acessoMotorista()">
+        Acessar como motorista
+      </button>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="group">
+      <div class="group-title">🛠️ Administração</div>
+
+      <button class="btn btn-admin" onclick="acessoAdmin()">
+        Acessar administração
+      </button>
     </div>
 
     <div class="footer">
-      Uso exclusivo para motoristas autorizados
+      Mobilidade com transparência e segurança
     </div>
 
   </div>
 </div>
 
-<script src="core/global.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/auth.js"></script>
-
 <script>
-/* ================= PROTEÇÃO DE ACESSO ================= */
-
-(async () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-  const admin = JSON.parse(localStorage.getItem("adminRF"));
-
-  // ADMIN logado não usa este dashboard
-  if(admin && admin.tipo === "admin"){
-    window.location.href = "dashboard-admin.html";
-    return;
-  }
-
-  // Não logado
-  if(!usuario){
-    window.location.href = "login-motorista.html";
-    return;
-  }
-
-  // Passageiro não entra aqui
-  if(usuario.tipo === "passageiro"){
-    window.location.href = "dashboard-passageiro.html";
-    return;
-  }
-
-  // Validação administrativa
-  const valido = await validarUsuarioAtivo();
-  if(!valido) return;
-})();
-
 /* ================= AÇÕES ================= */
 
-document.getElementById("btnIniciar").onclick = () => {
-  App.reset();
-  App.go("origem.html");
-};
+function passageiroCadastrado(){
+  window.location.href = "login-passageiro.html";
+}
 
-function abrirRegras(){
-  App.go("regras-motorista.html");
+function passageiroNovo(){
+  window.location.href = "cadastro.html";
+}
+
+function acessoMotorista(){
+  window.location.href = "login-motorista.html";
+}
+
+function acessoAdmin(){
+  window.location.href = "admin-login.html";
 }
 </script>
 
