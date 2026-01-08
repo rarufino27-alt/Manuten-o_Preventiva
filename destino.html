@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
 body{
@@ -71,6 +69,7 @@ body{
   border:1px solid #ddd;
   background:#fff;
   color:#000;
+  cursor:pointer;
 }
 
 .primary{
@@ -80,6 +79,7 @@ body{
   font-weight:700;
   border-radius:18px;
   box-shadow:0 8px 18px rgba(212,175,55,.35);
+  cursor:pointer;
 }
 
 .secondary{
@@ -87,6 +87,7 @@ body{
   padding:14px;
   border-radius:16px;
   background:#fff;
+  cursor:pointer;
 }
 
 .modal{
@@ -137,56 +138,52 @@ body{
 
 <div class="modal" id="modal">
   <div class="modal-content">
-    <input id="busca" placeholder="Buscar destino..." style="width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;color:#000">
+    <input
+      id="busca"
+      placeholder="Buscar destino..."
+      style="width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;color:#000"
+    >
     <div id="lista" style="margin-top:10px;max-height:260px;overflow:auto"></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/auth.js"></script>
 <script src="core/global.js"></script>
 <script src="core/datamanager.js"></script>
 
 <script>
-(async () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+/* ================= PROTEÇÃO DE ACESSO ================= */
 
-  // Não cadastrado
-  if(!usuario){
-    window.location.href = "cadastro.html";
-    return;
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
+// Não logado → index neutra
+if(!usuario){
+  window.location.href = "index.html";
+}
+
+// Origem obrigatória
+const origem = App.get("origem");
+if(!origem){
+  if(usuario.tipo === "motorista"){
+    window.location.href = "dashboard-motorista.html";
+  }else{
+    window.location.href = "dashboard-passageiro.html";
   }
+}
 
-  // Bloqueio automático
-  const valido = await validarUsuarioAtivo();
-  if(!valido) return;
+// Botões
+document.getElementById("btnVoltar").onclick = () => {
+  App.go("origem.html");
+};
 
-  // Origem obrigatória
-  const origem = App.get("origem");
-  if(!origem){
-    if(usuario.tipo === "motorista"){
-      window.location.href = "index.html";
-    }else{
-      window.location.href = "index-passageiro.html";
-    }
-    return;
+document.getElementById("btnInicio").onclick = () => {
+  if(usuario.tipo === "motorista"){
+    window.location.href = "dashboard-motorista.html";
+  }else{
+    window.location.href = "dashboard-passageiro.html";
   }
+};
 
-  // Botões dinâmicos
-  document.getElementById("btnVoltar").onclick = () => {
-    App.go("origem.html");
-  };
-
-  document.getElementById("btnInicio").onclick = () => {
-    if(usuario.tipo === "motorista"){
-      window.location.href = "index.html";
-    }else{
-      window.location.href = "index-passageiro.html";
-    }
-  };
-})();
-
-/* ================= LÓGICA DE DESTINO ================= */
+/* ================= LÓGICA DESTINO ================= */
 
 const destinoBtn = document.getElementById("destinoBtn");
 const modal = document.getElementById("modal");
@@ -195,7 +192,6 @@ const busca = document.getElementById("busca");
 const btn = document.getElementById("btnContinuar");
 
 let destinos = [];
-const origem = App.get("origem");
 
 destinoBtn.onclick = () => {
   modal.style.display = "flex";
@@ -220,7 +216,7 @@ function render(arr){
     const div = document.createElement("div");
     div.textContent = d;
     div.style.padding = "14px";
-    div.style.color = "#000";
+    div.style.cursor = "pointer";
     div.onclick = () => {
       destinoBtn.textContent = d;
       App.set("destino", d);
