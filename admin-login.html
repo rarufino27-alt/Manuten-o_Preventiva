@@ -37,7 +37,7 @@ body{
 h1{
   text-align:center;
   font-size:1.4rem;
-  color:#000;
+  font-weight:900;
 }
 
 input{
@@ -77,75 +77,91 @@ button:active{
     <h1>Administração</h1>
 
     <input
-      id="usuario"
-      placeholder="Usuário administrador"
-      autocomplete="off"
-    >
-
-    <input
-      id="senha"
-      type="password"
-      placeholder="Senha"
+      id="cpf"
+      placeholder="CPF do administrador"
+      maxlength="14"
       autocomplete="off"
     >
 
     <button id="btnEntrar">Entrar</button>
 
     <div class="error" id="erro">
-      Acesso não autorizado
+      Administrador não autorizado
     </div>
 
   </div>
 </div>
 
-<!-- BASE LOCAL DE ADMINS -->
-<script src="core/admins.js"></script>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = supabase.createClient(
+  "https://msnqiiwcityikslikbow.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+);
+</script>
 
 <script>
 /* ================= AUTO-REDIRECT ================= */
 
 const adminLogado = JSON.parse(localStorage.getItem("adminRF"));
-
 if(adminLogado && adminLogado.tipo === "admin"){
   window.location.href = "dashboard-admin.html";
 }
 
-/* ================= LOGIN ================= */
+/* ================= ELEMENTOS ================= */
 
-const usuarioInput = document.getElementById("usuario");
-const senhaInput = document.getElementById("senha");
-const erro = document.getElementById("erro");
+const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnEntrar");
+const erro = document.getElementById("erro");
+
+/* ================= MÁSCARA CPF ================= */
+
+cpfInput.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value = v;
+});
+
+/* ================= EVENTOS ================= */
 
 btn.addEventListener("click", loginAdmin);
-
-senhaInput.addEventListener("keypress", e=>{
+cpfInput.addEventListener("keypress", e=>{
   if(e.key === "Enter") loginAdmin();
 });
 
-usuarioInput.addEventListener("keypress", e=>{
-  if(e.key === "Enter") loginAdmin();
-});
+/* ================= LOGIN ADMIN ================= */
 
-function loginAdmin(){
+async function loginAdmin(){
   erro.style.display = "none";
 
-  const usuario = usuarioInput.value.trim();
-  const senha = senhaInput.value.trim();
+  const cpf = cpfInput.value.replace(/\D/g,"");
 
-  if(!usuario || !senha){
-    erro.innerText = "Informe usuário e senha";
+  if(cpf.length !== 11){
     erro.style.display = "block";
     return;
   }
 
-  const admin = buscarAdmin(usuario, senha);
+  const { data, error } = await supabaseClient
+    .from("usuarios")
+    .select("*")
+    .eq("cpf", cpf)
+    .eq("tipo", "admin")
+    .eq("ativo", true)
+    .single();
 
-  if(!admin){
-    erro.innerText = "Acesso não autorizado";
+  if(error || !data){
     erro.style.display = "block";
     return;
   }
+
+  const admin = {
+    tipo: "admin",
+    nome: data.nome,
+    cpf: data.cpf
+  };
 
   localStorage.setItem("adminRF", JSON.stringify(admin));
   window.location.href = "dashboard-admin.html";
