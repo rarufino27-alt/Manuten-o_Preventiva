@@ -28,7 +28,7 @@ h1{
   margin-bottom:18px;
 }
 
-select,input{
+input{
   width:100%;
   padding:13px;
   border-radius:12px;
@@ -67,7 +67,6 @@ button:active{
 <div class="card">
   <h1>Cadastro de Passageiro</h1>
 
-  <!-- PASSAGEIRO NÃO ESCOLHE TIPO -->
   <input type="text" id="nome" placeholder="Nome completo">
   <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
   <input type="text" id="cpf" placeholder="CPF" maxlength="14">
@@ -87,17 +86,17 @@ button:active{
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "SUA_CHAVE_PUBLICA_AQUI"
+  "SUA_ANON_KEY_AQUI"
 );
 </script>
 
 <script>
 /* ================= PROTEÇÃO ================= */
 
-// Se já estiver logado como passageiro, vai direto
+// Se QUALQUER usuário já estiver logado, volta para index
 const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
-  window.location.href = "dashboard-passageiro.html";
+if(usuarioLogado){
+  window.location.href = "index.html";
 }
 
 /* ================= ELEMENTOS ================= */
@@ -131,15 +130,15 @@ async function cadastrar(){
     return;
   }
 
-  /* 🔎 Verifica se CPF já existe */
-  const { data: existente } = await supabaseClient
+  // 🔎 Verifica se CPF já existe
+  const { data, error } = await supabaseClient
     .from("usuarios")
     .select("id")
     .eq("cpf", cpf)
     .eq("tipo", "passageiro")
-    .single();
+    .maybeSingle();
 
-  if(existente){
+  if(data){
     alert("CPF já cadastrado. Use o login de passageiro.");
     window.location.href = "login-passageiro.html";
     return;
@@ -154,11 +153,11 @@ async function cadastrar(){
     created_at: new Date().toISOString()
   };
 
-  const { error } = await supabaseClient
+  const { error: insertError } = await supabaseClient
     .from("usuarios")
     .insert(usuario);
 
-  if(error){
+  if(insertError){
     alert("Erro ao salvar cadastro");
     return;
   }
