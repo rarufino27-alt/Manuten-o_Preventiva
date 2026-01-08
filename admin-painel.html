@@ -137,6 +137,13 @@ button:active{
 <script src="core/admins.js"></script>
 
 <script>
+/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+const adminLogado = JSON.parse(localStorage.getItem("adminRF"));
+if(adminLogado && adminLogado.tipo === "admin"){
+  window.location.href = "dashboard-admin.html";
+}
+
+/* ================= LOGIN ================= */
 const usuarioInput = document.getElementById("usuario");
 const senhaInput = document.getElementById("senha");
 const erro = document.getElementById("erro");
@@ -174,7 +181,8 @@ function loginAdmin(){
 
   localStorage.setItem("adminRF", JSON.stringify(admin));
 
-  window.location.href = "admin.html";
+  // DESTINO CORRETO
+  window.location.href = "dashboard-admin.html";
 }
 </script>
 
