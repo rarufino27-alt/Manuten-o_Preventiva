@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
 body{
@@ -132,14 +130,15 @@ button:active{
 <!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ⚠️ INSERIR AQUI SUA URL E SUA ANON KEY DO SUPABASE */
 const supabaseClient = supabase.createClient(
-  "SUA_URL",
-  "SUA_CHAVE"
+  "SUA_URL_AQUI",
+  "SUA_ANON_KEY_AQUI"
 );
 </script>
 
 <script>
-/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+/* ================= REDIRECIONA SE JÁ LOGADO ================= */
 
 const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
 
@@ -171,7 +170,7 @@ cpfInput.addEventListener("keypress", e => {
   if(e.key === "Enter") loginPassageiro();
 });
 
-/* ================= LOGIN ================= */
+/* ================= LOGIN PASSAGEIRO ================= */
 
 async function loginPassageiro(){
   erro.style.display = "none";
