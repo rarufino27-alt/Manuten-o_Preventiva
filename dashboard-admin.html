@@ -127,6 +127,7 @@ body{
 const admin = JSON.parse(localStorage.getItem("adminRF"));
 
 if(!admin || admin.tipo !== "admin"){
+  localStorage.removeItem("adminRF");
   window.location.href = "admin-login.html";
 }
 
