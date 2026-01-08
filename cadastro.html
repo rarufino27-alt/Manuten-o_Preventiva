@@ -122,15 +122,21 @@ async function cadastrar(){
     return;
   }
 
-  // 🔎 Verifica se CPF já existe
-  const { data } = await supabaseClient
+  /* 🔎 VERIFICA SE CPF JÁ EXISTE */
+  const { data: existente, error: erroBusca } = await supabaseClient
     .from("usuarios")
     .select("id")
     .eq("cpf", cpf)
     .eq("tipo", "passageiro")
     .maybeSingle();
 
-  if(data){
+  if (erroBusca) {
+    console.error("ERRO BUSCA CPF:", erroBusca);
+    alert(erroBusca.message);
+    return;
+  }
+
+  if (existente) {
     alert("CPF já cadastrado. Use o login de passageiro.");
     window.location.href = "login-passageiro.html";
     return;
@@ -141,20 +147,24 @@ async function cadastrar(){
     nome,
     telefone,
     cpf,
-    ativo: true,
-    created_at: new Date().toISOString()
+    ativo: true
   };
 
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("usuarios")
-    .insert(usuario);
+    .insert(usuario)
+    .select();
 
-  if(error){
-    alert("Erro ao salvar cadastro");
+  if (error) {
+    console.error("ERRO SUPABASE INSERT:", error);
+    alert(error.message);
     return;
   }
 
+  console.log("USUÁRIO CRIADO COM SUCESSO:", data);
+
   localStorage.setItem("usuarioRF", JSON.stringify(usuario));
+
   window.location.href = "dashboard-passageiro.html";
 }
 </script>
