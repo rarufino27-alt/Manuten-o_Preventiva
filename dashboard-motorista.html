@@ -166,13 +166,8 @@ body{
 
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-// Não logado → index neutra
-if(!usuario){
-  window.location.href = "index.html";
-}
-
-// Tipo errado → index neutra
-if(usuario.tipo !== "motorista"){
+// Sempre voltar para a página neutra se algo estiver errado
+if(!usuario || usuario.tipo !== "motorista"){
   window.location.href = "index.html";
 }
 
