@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Admin – RF Driver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="./theme/theme.css">
+
+<style>
+body{
+  background:#f4f4f4;
+  font-family:Inter, Arial, sans-serif;
+  margin:0;
+  padding:0;
+  color:#222;
+}
+
+/* MENU SUPERIOR */
+.topbar{
+  background:#111;
+  color:#fff;
+  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.topbar strong{
+  font-size:1rem;
+  letter-spacing:1px;
+}
+
+.topbar button{
+  background:#d4af37;
+  border:none;
+  border-radius:10px;
+  padding:8px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* CONTEÚDO */
+.page{
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+  margin-bottom:16px;
+}
+
+.card h2{
+  margin:0 0 10px 0;
+  font-size:1.2rem;
+  color:#d4af37;
+}
+
+.card p{
+  font-size:.9rem;
+  color:#555;
+}
+
+/* AÇÕES */
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+}
+
+.actions button{
+  flex:1;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.btn-admin{
+  background:#111;
+  color:#fff;
+}
+
+.btn-logout{
+  background:#e53935;
+  color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PROTEÇÃO -->
+<script>
+const admin = JSON.parse(localStorage.getItem("adminRF"));
+
+if(!admin || admin.tipo !== "admin"){
+  window.location.href = "admin-login.html";
+}
+</script>
+
+<!-- MENU SUPERIOR -->
+<div class="topbar">
+  <strong>ADMIN • RF DRIVER</strong>
+  <button onclick="irPainel()">Painel de Controle</button>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="page">
+
+  <div class="card">
+    <h2>Bem-vindo, Administrador</h2>
+    <p>
+      Este é o <strong>Dashboard Administrativo</strong>.
+      A partir daqui você pode acessar o painel de controle,
+      gerenciar usuários e supervisionar o funcionamento do aplicativo.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Ações rápidas</h2>
+
+    <div class="actions">
+      <button class="btn-admin" onclick="irPainel()">
+        👥 Gerenciar Usuários
+      </button>
+
+      <button class="btn-logout" onclick="logoutAdmin()">
+        🚪 Sair
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script src="core/admins.js"></script>
+
+<script>
+function irPainel(){
+  window.location.href = "admin-painel.html";
+}
+
+function logoutAdmin(){
+  localStorage.removeItem("adminRF");
+  window.location.href = "admin-login.html";
+}
+</script>
+
+</body>
+</html>
