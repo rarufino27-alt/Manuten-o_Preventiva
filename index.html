@@ -2,16 +2,42 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Bem-vindo – RF Driver</title>
+<title>RF Driver – Motorista</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#D4AF37">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="RF Driver">
+<link rel="apple-touch-icon" href="./icons/192.png">
+
 <link rel="stylesheet" href="./theme/theme.css">
+<link rel="stylesheet" href="./theme/layout.css">
+<link rel="stylesheet" href="./theme/components.css">
 
 <style>
+:root{
+  --gold:#D4AF37;
+  --gold-soft:#E6C97A;
+  --text:#444;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes shine{
+  0%{background-position:-200%}
+  100%{background-position:200%}
+}
+
 body{
   background:radial-gradient(circle at top,#ffffff,#f2f2f2);
-  font-family:Inter, Arial, sans-serif;
-  color:#222;
+  color:var(--text);
 }
 
 .page{
@@ -19,62 +45,57 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:20px;
+  padding:22px;
 }
 
 .box{
   width:100%;
   max-width:420px;
-  background:#fff;
-  border-radius:28px;
-  padding:30px 24px;
-  box-shadow:0 14px 36px rgba(0,0,0,.12);
   display:flex;
   flex-direction:column;
-  gap:20px;
+  gap:22px;
+}
+
+.hero{
+  text-align:center;
+  padding:34px 26px;
+  border-radius:26px;
+  background:#fff;
+  border:1px solid rgba(212,175,55,.35);
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
   animation:fadeUp .6s ease;
 }
 
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-h1{
-  text-align:center;
-  font-size:1.6rem;
+.hero-title{
+  font-size:1.9rem;
   font-weight:900;
-  color:#000;
+  letter-spacing:2px;
+  background:linear-gradient(120deg,var(--gold),var(--gold-soft),var(--gold));
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shine 6s linear infinite;
 }
 
-.subtitle{
-  text-align:center;
-  font-size:.85rem;
+.hero-sub{
+  margin-top:6px;
+  font-size:.9rem;
   color:#666;
 }
 
-.btn{
+.primary-action{
   padding:18px;
-  border-radius:18px;
-  border:none;
-  font-size:1rem;
+  font-size:1.05rem;
   font-weight:800;
-  cursor:pointer;
-}
-
-.btn-passageiro{
-  background:#d4af37;
+  border-radius:18px;
+  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
   color:#000;
+  border:none;
 }
 
-.btn-motorista{
-  background:#111;
-  color:#fff;
-}
-
-.btn-admin{
-  background:#e0e0e0;
-  color:#000;
+.secondary{
+  display:flex;
+  gap:12px;
 }
 
 .footer{
@@ -90,64 +111,74 @@ h1{
 <div class="page">
   <div class="box">
 
-    <h1>Bem-vindo ao RF Driver</h1>
-    <div class="subtitle">
-      Escolha como deseja acessar o aplicativo
+    <div class="hero">
+      <div class="hero-title">RF DRIVER</div>
+      <div class="hero-sub">Dashboard do motorista</div>
     </div>
 
-    <button class="btn btn-passageiro" onclick="acessoPassageiro()">
-      🚶 Sou Passageiro
+    <button class="btn primary-action" id="btnIniciar">
+      ▶ Iniciar cálculo de corrida
     </button>
 
-    <button class="btn btn-motorista" onclick="acessoMotorista()">
-      🚗 Sou Motorista
-    </button>
-
-    <button class="btn btn-admin" onclick="acessoAdmin()">
-      🛠️ Administração
-    </button>
+    <div class="secondary">
+      <button class="btn btn-outline" onclick="abrirRegras()">
+        📋 Regras do motorista
+      </button>
+      <a class="btn btn-outline" href="instalar-app.html">
+        📲 Instalar App
+      </a>
+    </div>
 
     <div class="footer">
-      Mobilidade com transparência e segurança
+      Uso exclusivo para motoristas autorizados
     </div>
 
   </div>
 </div>
 
+<script src="core/global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/auth.js"></script>
+
 <script>
-/* ================= REDIRECIONAMENTO AUTOMÁTICO ================= */
+/* ================= PROTEÇÃO DE ACESSO ================= */
 
-const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-const admin = JSON.parse(localStorage.getItem("adminRF"));
+(async () => {
+  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+  const admin = JSON.parse(localStorage.getItem("adminRF"));
 
-// ADMIN logado vai direto para o dashboard admin
-if(admin){
-  window.location.href = "dashboard-admin.html";
-}
-
-// USUÁRIO logado
-if(usuario){
-  if(usuario.tipo === "motorista"){
-    window.location.href = "dashboard-motorista.html";
+  // ADMIN logado não usa este dashboard
+  if(admin && admin.tipo === "admin"){
+    window.location.href = "dashboard-admin.html";
+    return;
   }
 
+  // Não logado
+  if(!usuario){
+    window.location.href = "login-motorista.html";
+    return;
+  }
+
+  // Passageiro não entra aqui
   if(usuario.tipo === "passageiro"){
     window.location.href = "dashboard-passageiro.html";
+    return;
   }
-}
+
+  // Validação administrativa
+  const valido = await validarUsuarioAtivo();
+  if(!valido) return;
+})();
 
 /* ================= AÇÕES ================= */
 
-function acessoPassageiro(){
-  window.location.href = "opcao-passageiro.html";
-}
+document.getElementById("btnIniciar").onclick = () => {
+  App.reset();
+  App.go("origem.html");
+};
 
-function acessoMotorista(){
-  window.location.href = "login-motorista.html";
-}
-
-function acessoAdmin(){
-  window.location.href = "admin-login.html";
+function abrirRegras(){
+  App.go("regras-motorista.html");
 }
 </script>
 
