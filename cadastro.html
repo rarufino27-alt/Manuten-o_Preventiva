@@ -69,75 +69,51 @@ button:active{
 
   <input type="text" id="nome" placeholder="Nome completo">
   <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
-  <input type="text" id="cpf" placeholder="CPF" maxlength="14">
 
   <button id="btnCadastrar">
     Finalizar cadastro
   </button>
 
   <div class="info">
-    Este cadastro é feito apenas uma vez.<br>
-    Em novos acessos, utilize o login com CPF.
+    Cadastro realizado uma única vez.<br>
+    Em novos acessos, utilize seu telefone para login.
   </div>
 </div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+  "SUA_CHAVE_PUBLICA_AQUI"
 );
 </script>
 
 <script>
-/* ================= ELEMENTOS ================= */
-
 const nomeInput = document.getElementById("nome");
 const telInput = document.getElementById("telefone");
-const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnCadastrar");
-
-/* ================= MÁSCARA CPF ================= */
-
-cpfInput.addEventListener("input", () => {
-  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  cpfInput.value = v;
-});
-
-/* ================= CADASTRO ================= */
 
 btn.addEventListener("click", cadastrar);
 
 async function cadastrar(){
   const nome = nomeInput.value.trim();
   const telefone = telInput.value.trim();
-  const cpf = cpfInput.value.replace(/\D/g,"");
 
-  if(!nome || !telefone || cpf.length !== 11){
-    alert("Preencha corretamente todos os campos");
+  if(!nome || !telefone){
+    alert("Preencha nome e telefone corretamente");
     return;
   }
 
-  /* 🔎 VERIFICA SE CPF JÁ EXISTE */
-  const { data: existente, error: erroBusca } = await supabaseClient
+  // 🔎 Verifica se telefone já existe
+  const { data: existente } = await supabaseClient
     .from("usuarios")
     .select("id")
-    .eq("cpf", cpf)
+    .eq("telefone", telefone)
     .eq("tipo", "passageiro")
     .maybeSingle();
 
-  if (erroBusca) {
-    console.error("ERRO BUSCA CPF:", erroBusca);
-    alert(erroBusca.message);
-    return;
-  }
-
-  if (existente) {
-    alert("CPF já cadastrado. Use o login de passageiro.");
+  if(existente){
+    alert("Telefone já cadastrado. Use o login de passageiro.");
     window.location.href = "login-passageiro.html";
     return;
   }
@@ -146,25 +122,20 @@ async function cadastrar(){
     tipo: "passageiro",
     nome,
     telefone,
-    cpf,
-    ativo: true
+    ativo: true,
+    criado_em: new Date().toISOString()
   };
 
-  const { data, error } = await supabaseClient
+  const { error } = await supabaseClient
     .from("usuarios")
-    .insert(usuario)
-    .select();
+    .insert(usuario);
 
-  if (error) {
-    console.error("ERRO SUPABASE INSERT:", error);
-    alert(error.message);
+  if(error){
+    alert("Erro ao salvar cadastro");
     return;
   }
 
-  console.log("USUÁRIO CRIADO COM SUCESSO:", data);
-
   localStorage.setItem("usuarioRF", JSON.stringify(usuario));
-
   window.location.href = "dashboard-passageiro.html";
 }
 </script>
