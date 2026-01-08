@@ -17,8 +17,8 @@ body{
 .page{
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   padding:20px;
 }
 
@@ -26,17 +26,23 @@ body{
   width:100%;
   max-width:420px;
   background:#fff;
-  border-radius:26px;
-  padding:28px 24px;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  border-radius:28px;
+  padding:30px 24px;
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
   display:flex;
   flex-direction:column;
   gap:20px;
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 h1{
   text-align:center;
-  font-size:1.5rem;
+  font-size:1.6rem;
   font-weight:900;
   color:#000;
 }
@@ -47,7 +53,7 @@ h1{
   color:#666;
 }
 
-button{
+.btn{
   padding:18px;
   border-radius:18px;
   border:none;
@@ -71,10 +77,6 @@ button{
   color:#000;
 }
 
-button:active{
-  transform:scale(.97);
-}
-
 .footer{
   text-align:center;
   font-size:.75rem;
@@ -89,39 +91,51 @@ button:active{
   <div class="box">
 
     <h1>Passageiro</h1>
+
     <div class="subtitle">
-      Escolha como deseja continuar
+      Como deseja acessar o aplicativo?
     </div>
 
-    <button class="btn-novo" onclick="novo()">
-      Sou passageiro novo
+    <button class="btn btn-novo" onclick="novoPassageiro()">
+      🆕 Sou passageiro novo
     </button>
 
-    <button class="btn-login" onclick="login()">
-      Já sou cadastrado
+    <button class="btn btn-login" onclick="passageiroCadastrado()">
+      🔐 Já sou cadastrado
     </button>
 
-    <button class="btn-voltar" onclick="voltar()">
-      Voltar
+    <button class="btn btn-voltar" onclick="voltarInicio()">
+      ⬅ Voltar
     </button>
 
     <div class="footer">
-      RF Driver • Mobilidade com transparência
+      RF Driver • Acesso exclusivo para passageiros
     </div>
 
   </div>
 </div>
 
 <script>
-function novo(){
+/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
+if(usuario && usuario.tipo === "passageiro"){
+  window.location.href = "dashboard-passageiro.html";
+  return;
+}
+
+/* ================= AÇÕES ================= */
+
+function novoPassageiro(){
   window.location.href = "cadastro.html";
 }
 
-function login(){
+function passageiroCadastrado(){
   window.location.href = "login-passageiro.html";
 }
 
-function voltar(){
+function voltarInicio(){
   window.location.href = "index.html";
 }
 </script>
