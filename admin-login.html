@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Admin – Login</title>
+<title>Login Admin – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
@@ -43,6 +43,7 @@ input{
   padding:14px;
   border-radius:14px;
   border:1px solid #ccc;
+  font-size:.95rem;
 }
 
 button{
@@ -51,6 +52,11 @@ button{
   border-radius:16px;
   background:#d4af37;
   font-weight:800;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.98);
 }
 
 .error{
@@ -66,9 +72,10 @@ button{
 
 <div class="page">
   <div class="card">
-    <h1>Admin</h1>
 
-    <input id="usuario" placeholder="Usuário">
+    <h1>Administração</h1>
+
+    <input id="usuario" placeholder="Usuário administrador">
     <input id="senha" type="password" placeholder="Senha">
 
     <button onclick="loginAdmin()">Entrar</button>
@@ -76,12 +83,22 @@ button{
     <div class="error" id="erro">
       Acesso não autorizado
     </div>
+
   </div>
 </div>
 
 <script src="core/admins.js"></script>
 
 <script>
+/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+
+const adminLogado = JSON.parse(localStorage.getItem("adminRF"));
+if(adminLogado && adminLogado.tipo === "admin"){
+  window.location.href = "dashboard-admin.html";
+}
+
+/* ================= LOGIN ================= */
+
 function loginAdmin(){
   const usuario = document.getElementById("usuario").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -89,15 +106,22 @@ function loginAdmin(){
 
   erro.style.display = "none";
 
+  if(!usuario || !senha){
+    erro.innerText = "Informe usuário e senha";
+    erro.style.display = "block";
+    return;
+  }
+
   const admin = buscarAdmin(usuario, senha);
 
   if(!admin){
+    erro.innerText = "Acesso não autorizado";
     erro.style.display = "block";
     return;
   }
 
   localStorage.setItem("adminRF", JSON.stringify(admin));
-  window.location.href = "admin.html";
+  window.location.href = "dashboard-admin.html";
 }
 </script>
 
