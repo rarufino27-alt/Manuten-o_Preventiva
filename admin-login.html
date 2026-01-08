@@ -11,6 +11,7 @@
 body{
   background:radial-gradient(circle at top,#ffffff,#f2f2f2);
   font-family:Inter, Arial, sans-serif;
+  color:#222;
 }
 
 .page{
@@ -75,10 +76,20 @@ button:active{
 
     <h1>Administração</h1>
 
-    <input id="usuario" placeholder="Usuário administrador">
-    <input id="senha" type="password" placeholder="Senha">
+    <input
+      id="usuario"
+      placeholder="Usuário administrador"
+      autocomplete="off"
+    >
 
-    <button onclick="loginAdmin()">Entrar</button>
+    <input
+      id="senha"
+      type="password"
+      placeholder="Senha"
+      autocomplete="off"
+    >
+
+    <button id="btnEntrar">Entrar</button>
 
     <div class="error" id="erro">
       Acesso não autorizado
@@ -87,24 +98,40 @@ button:active{
   </div>
 </div>
 
+<!-- BASE LOCAL DE ADMINS -->
 <script src="core/admins.js"></script>
 
 <script>
-/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+/* ================= AUTO-REDIRECT ================= */
 
 const adminLogado = JSON.parse(localStorage.getItem("adminRF"));
+
 if(adminLogado && adminLogado.tipo === "admin"){
   window.location.href = "dashboard-admin.html";
 }
 
 /* ================= LOGIN ================= */
 
-function loginAdmin(){
-  const usuario = document.getElementById("usuario").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const erro = document.getElementById("erro");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const erro = document.getElementById("erro");
+const btn = document.getElementById("btnEntrar");
 
+btn.addEventListener("click", loginAdmin);
+
+senhaInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginAdmin();
+});
+
+usuarioInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginAdmin();
+});
+
+function loginAdmin(){
   erro.style.display = "none";
+
+  const usuario = usuarioInput.value.trim();
+  const senha = senhaInput.value.trim();
 
   if(!usuario || !senha){
     erro.innerText = "Informe usuário e senha";
