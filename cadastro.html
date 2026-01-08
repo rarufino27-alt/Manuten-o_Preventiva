@@ -69,73 +69,91 @@ button:active{
 
   <input type="text" id="nome" placeholder="Nome completo">
   <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
+  <input type="text" id="cpf" placeholder="CPF" maxlength="14">
 
-  <button id="btnCadastrar">
-    Finalizar cadastro
-  </button>
+  <button id="btnCadastrar">Finalizar cadastro</button>
 
   <div class="info">
-    Cadastro realizado uma única vez.<br>
-    Em novos acessos, utilize seu telefone para login.
+    Este cadastro é feito apenas uma vez.<br>
+    Em novos acessos, utilize o login com CPF.
   </div>
 </div>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "SUA_CHAVE_PUBLICA_AQUI"
+  "SUA_ANON_KEY_AQUI"
 );
 </script>
 
 <script>
 const nomeInput = document.getElementById("nome");
 const telInput = document.getElementById("telefone");
+const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnCadastrar");
+
+/* MÁSCARA CPF */
+cpfInput.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value = v;
+});
 
 btn.addEventListener("click", cadastrar);
 
 async function cadastrar(){
   const nome = nomeInput.value.trim();
   const telefone = telInput.value.trim();
+  const cpf = cpfInput.value.replace(/\D/g,"");
 
-  if(!nome || !telefone){
-    alert("Preencha nome e telefone corretamente");
+  if(!nome || !telefone || cpf.length !== 11){
+    alert("Preencha corretamente todos os campos");
     return;
   }
 
-  // 🔎 Verifica se telefone já existe
-  const { data: existente } = await supabaseClient
+  /* Verifica se CPF já existe */
+  const { data: existente, error: selectError } = await supabaseClient
     .from("usuarios")
     .select("id")
-    .eq("telefone", telefone)
+    .eq("cpf", cpf)
     .eq("tipo", "passageiro")
     .maybeSingle();
 
+  if(selectError){
+    alert("Erro ao verificar CPF");
+    console.error(selectError);
+    return;
+  }
+
   if(existente){
-    alert("Telefone já cadastrado. Use o login de passageiro.");
+    alert("CPF já cadastrado. Use o login de passageiro.");
     window.location.href = "login-passageiro.html";
     return;
   }
 
-  const usuario = {
+  const novoUsuario = {
     tipo: "passageiro",
-    nome,
-    telefone,
-    ativo: true,
-    criado_em: new Date().toISOString()
+    nome: nome,
+    telefone: telefone,
+    cpf: cpf,
+    ativo: true
   };
 
-  const { error } = await supabaseClient
+  const { error: insertError } = await supabaseClient
     .from("usuarios")
-    .insert(usuario);
+    .insert(novoUsuario);
 
-  if(error){
+  if(insertError){
     alert("Erro ao salvar cadastro");
+    console.error(insertError);
     return;
   }
 
-  localStorage.setItem("usuarioRF", JSON.stringify(usuario));
+  localStorage.setItem("usuarioRF", JSON.stringify(novoUsuario));
   window.location.href = "dashboard-passageiro.html";
 }
 </script>
