@@ -189,16 +189,16 @@ calcular();
 
 btnWhats.onclick = ()=>{
   const msg =
-`🚖 RF DRIVER – RECIBO
+`🚖 RF DRIVER – RECIBO de Viagem
 
-Origem: ${origem}
-Destino: ${destino}
+*Origem:* ${origem}
+*Destino:* ${destino}
 
-${window.__detalhesWhats.join("\n")}
+*${window.__detalhesWhats.join("\n")}
 
-Total: R$ ${App.get("total").toFixed(2)}
+*Total:* R$ ${App.get("total").toFixed(2)}
 
-${assinatura.innerText}`;
+*${assinatura.innerText}`;
 
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 };
