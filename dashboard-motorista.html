@@ -166,9 +166,9 @@ body{
 
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-// Sempre voltar para a página neutra se algo estiver errado
 if(!usuario || usuario.tipo !== "motorista"){
-  window.location.href = "index.html";
+  alert("Acesso restrito. Faça login como motorista.");
+  window.location.href = "login-motorista.html";
 }
 
 /* ================= AÇÕES ================= */
