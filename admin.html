@@ -2,167 +2,180 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Painel Admin – RF Driver</title>
+<title>Login Administrativo – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
 
 <style>
 body{
-  background:#f2f2f2;
+  background:radial-gradient(circle at top,#ffffff,#f2f2f2);
   font-family:Inter, Arial, sans-serif;
-  padding:16px;
+  color:#222;
 }
 
-h1{
-  text-align:center;
-  margin-bottom:20px;
+.page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
 }
 
 .card{
   background:#fff;
-  border-radius:16px;
+  width:100%;
+  max-width:380px;
+  padding:28px 22px;
+  border-radius:26px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.logo{
+  text-align:center;
+}
+
+.logo h1{
+  font-size:1.6rem;
+  font-weight:900;
+  letter-spacing:2px;
+  color:#000;
+}
+
+.logo span{
+  font-size:.8rem;
+  color:#666;
+}
+
+input{
+  width:100%;
   padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.badge{
-  padding:4px 10px;
-  border-radius:12px;
-  font-size:.7rem;
-  font-weight:700;
-}
-
-.motorista{background:#d4af37;color:#000}
-.passageiro{background:#e0e0e0;color:#000}
-
-.ativo{color:#2e7d32;font-weight:700}
-.bloqueado{color:#c62828;font-weight:700}
-
-.actions{
-  margin-top:10px;
-  display:flex;
-  gap:8px;
+  border-radius:16px;
+  border:1px solid #ccc;
+  font-size:1rem;
 }
 
 button{
-  flex:1;
-  padding:10px;
+  padding:16px;
+  border-radius:18px;
   border:none;
-  border-radius:12px;
-  font-weight:700;
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
+  font-size:1rem;
+  font-weight:800;
+  color:#000;
+  cursor:pointer;
 }
 
-.btn-bloquear{background:#ff5c5c;color:#fff}
-.btn-ativar{background:#4caf50;color:#fff}
-.btn-excluir{background:#111;color:#fff}
+button:active{
+  transform:scale(.98);
+}
+
+.error{
+  color:#c62828;
+  font-size:.8rem;
+  text-align:center;
+  display:none;
+}
+
+.info{
+  font-size:.75rem;
+  color:#666;
+  text-align:center;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Painel Administrativo</h1>
+<div class="page">
+  <div class="card">
 
-  <button onclick="logout()" style="margin-bottom:16px">
-  Sair
-</button>
+    <div class="logo">
+      <h1>ADMIN</h1>
+      <span>Acesso restrito</span>
+    </div>
 
-<div id="lista"></div>
+    <input
+      type="text"
+      id="usuario"
+      placeholder="Usuário"
+      autocomplete="off"
+    >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <input
+      type="password"
+      id="senha"
+      placeholder="Senha"
+      autocomplete="off"
+    >
+
+    <button id="btnEntrar">
+      Entrar
+    </button>
+
+    <div class="error" id="erro">
+      Usuário ou senha inválidos
+    </div>
+
+    <div class="info">
+      Área exclusiva para administração do sistema
+    </div>
+
+  </div>
+</div>
+
+<!-- BASE LOCAL DE ADMINS -->
+<script src="core/admins.js"></script>
+
 <script>
-const admin = JSON.parse(localStorage.getItem("adminRF"));
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const erro = document.getElementById("erro");
+const btn = document.getElementById("btnEntrar");
 
-if(!admin || admin.tipo !== "admin"){
-  window.location.href = "admin-login.html";
-}
+btn.addEventListener("click", loginAdmin);
 
-const supabaseClient = supabase.createClient(
-  "https://msnqiiwcityikslikbow.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
-);
+senhaInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginAdmin();
+});
 
-async function carregarUsuarios(){
-  const { data, error } = await supabaseClient
-    .from("usuarios")
-    .select("*")
-    .order("created_at",{ascending:false});
+usuarioInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginAdmin();
+});
 
-  if(error){
-    alert("Erro ao carregar usuários");
+function loginAdmin(){
+  erro.style.display = "none";
+
+  const usuario = usuarioInput.value.trim();
+  const senha = senhaInput.value.trim();
+
+  if(!usuario || !senha){
+    erro.innerText = "Preencha usuário e senha";
+    erro.style.display = "block";
     return;
   }
 
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+  const admin = buscarAdmin(usuario, senha);
 
-  data.forEach(u=>{
-    const div = document.createElement("div");
-    div.className = "card";
+  if(!admin){
+    erro.innerText = "Usuário ou senha inválidos";
+    erro.style.display = "block";
+    return;
+  }
 
-    div.innerHTML = `
-      <div class="header">
-        <strong>${u.nome}</strong>
-        <span class="badge ${u.tipo}">${u.tipo.toUpperCase()}</span>
-      </div>
+  localStorage.setItem("adminRF", JSON.stringify(admin));
 
-      <div>📞 ${u.telefone || "-"}</div>
-      ${u.cpf ? `<div>🪪 CPF: ${u.cpf}</div>` : ""}
-
-      <div>Status:
-        <span class="${u.ativo ? "ativo":"bloqueado"}">
-          ${u.ativo ? "ATIVO":"BLOQUEADO"}
-        </span>
-      </div>
-
-      <div class="actions">
-        <button class="${u.ativo ? "btn-bloquear":"btn-ativar"}"
-          onclick="alterarStatus('${u.id}',${!u.ativo})">
-          ${u.ativo ? "Bloquear":"Ativar"}
-        </button>
-
-        <button class="btn-excluir"
-          onclick="excluirUsuario('${u.id}')">
-          Excluir
-        </button>
-      </div>
-    `;
-
-    lista.appendChild(div);
-  });
+  window.location.href = "admin.html";
 }
-
-  function logout(){
-  localStorage.removeItem("adminLogado");
-  window.location.href = "admin-login.html";
-}
-
-async function alterarStatus(id,ativo){
-  await supabaseClient.from("usuarios")
-    .update({ ativo })
-    .eq("id", id);
-
-  carregarUsuarios();
-}
-
-async function excluirUsuario(id){
-  if(!confirm("Excluir este usuário definitivamente?")) return;
-
-  await supabaseClient.from("usuarios")
-    .delete()
-    .eq("id", id);
-
-  carregarUsuarios();
-}
-
-carregarUsuarios();
 </script>
 
 </body>
