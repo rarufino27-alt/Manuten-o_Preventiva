@@ -121,6 +121,18 @@ if(usuario.tipo==="motorista"){
   btnWhats.style.display="none";
 }
 
+/* ================= ELEMENTOS DOM ================= */
+const tipoViagem = document.getElementById("tipoViagem");
+const desvioSimples = document.getElementById("desvioSimples");
+const voltaPraia = document.getElementById("voltaPraia");
+const taxaFeira = document.getElementById("taxaFeira");
+const animalSel = document.getElementById("animal");
+const tempoEsperaInput = document.getElementById("tempoEspera");
+const desvioExtraInput = document.getElementById("desvioExtra");
+
+const detalhamento = document.getElementById("detalhamento");
+const totalDiv = document.getElementById("total");
+
 function calcular(){
   let total = valorBase;
   let detalhes = [];
@@ -147,20 +159,20 @@ function calcular(){
   if(voltaPraia.checked){ total+=Taxas.voltaPraia; detalhes.push(`🏖️ Volta da praia: +R$ ${Taxas.voltaPraia.toFixed(2)}`); }
   if(taxaFeira.checked){ total+=Taxas.feira; detalhes.push(`🧺 Taxa de feira: +R$ ${Taxas.feira.toFixed(2)}`); }
 
-  const animal = Number(document.getElementById("animal").value || 0);
+  const animal = Number(animalSel.value || 0);
   if(animal > 0){
     total += animal;
     detalhes.push(`🐶 Transporte de animal: +R$ ${animal.toFixed(2)}`);
   }
 
-  const minutos = Number(document.getElementById("tempoEspera").value || 0);
+  const minutos = Number(tempoEsperaInput.value || 0);
   if(minutos >= 5){
     const esperaValor = 3 + (minutos - 5) * 0.6;
     total += esperaValor;
     detalhes.push(`⏱️ Tempo de espera (${minutos} min): +R$ ${esperaValor.toFixed(2)}`);
   }
 
-  const extra = Number(document.getElementById("desvioExtra").value || 0);
+  const extra = Number(desvioExtraInput.value || 0);
   if(extra > 0){
     total += extra;
     detalhes.push(`➕ Desvio adicional: +R$ ${extra.toFixed(2)}`);
