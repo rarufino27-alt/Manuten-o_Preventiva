@@ -134,12 +134,11 @@ body{
 <script>
 /* ================= PROTEÇÃO DE ACESSO ================= */
 
-// Dashboard nunca é página inicial
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-// Se não estiver logado → index neutra
 if(!usuario || usuario.tipo !== "passageiro"){
-  window.location.href = "index.html";
+  alert("Acesso restrito. Faça login como passageiro.");
+  window.location.href = "login-passageiro.html";
 }
 
 /* ================= AÇÕES ================= */
