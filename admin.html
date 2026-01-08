@@ -78,9 +78,9 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const admin = JSON.parse(localStorage.getItem("adminLogado"));
+const admin = JSON.parse(localStorage.getItem("adminRF"));
 
-if(!admin){
+if(!admin || admin.tipo !== "admin"){
   window.location.href = "admin-login.html";
 }
 
