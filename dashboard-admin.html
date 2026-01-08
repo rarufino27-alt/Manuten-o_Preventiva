@@ -9,73 +9,59 @@
 
 <style>
 body{
-  background:#f4f4f4;
+  background:linear-gradient(180deg,#ffffff,#f3f3f3);
   font-family:Inter, Arial, sans-serif;
-  margin:0;
-  padding:0;
   color:#222;
 }
 
-/* MENU SUPERIOR */
-.topbar{
-  background:#111;
-  color:#fff;
-  padding:14px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.topbar strong{
-  font-size:1rem;
-  letter-spacing:1px;
-}
-
-.topbar button{
-  background:#d4af37;
-  border:none;
-  border-radius:10px;
-  padding:8px 14px;
-  font-weight:700;
-  cursor:pointer;
-}
-
-/* CONTEÚDO */
 .page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   padding:20px;
+}
+
+.box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:26px;
+  padding:30px 24px;
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.header{
+  text-align:center;
+}
+
+.header h1{
+  font-size:1.6rem;
+  font-weight:900;
+  color:#000;
+}
+
+.header span{
+  font-size:.85rem;
+  color:#666;
 }
 
 .card{
-  background:#fff;
+  background:#f9f9f9;
   border-radius:18px;
-  padding:20px;
-  box-shadow:0 8px 22px rgba(0,0,0,.08);
-  margin-bottom:16px;
-}
-
-.card h2{
-  margin:0 0 10px 0;
-  font-size:1.2rem;
-  color:#d4af37;
-}
-
-.card p{
+  padding:18px;
   font-size:.9rem;
-  color:#555;
+  color:#444;
 }
 
-/* AÇÕES */
-.actions{
-  display:flex;
-  gap:12px;
-  margin-top:12px;
-}
-
-.actions button{
-  flex:1;
-  padding:14px;
+.btn{
+  padding:16px;
+  border-radius:18px;
   border:none;
-  border-radius:14px;
+  font-size:1rem;
   font-weight:800;
   cursor:pointer;
 }
@@ -85,68 +71,78 @@ body{
   color:#fff;
 }
 
-.btn-logout{
-  background:#e53935;
-  color:#fff;
+.btn-outline{
+  background:#fff;
+  border:1px solid #ccc;
+}
+
+.footer{
+  text-align:center;
+  font-size:.75rem;
+  color:#777;
 }
 </style>
 </head>
 
 <body>
 
-<!-- PROTEÇÃO -->
+<div class="page">
+  <div class="box">
+
+    <div class="header">
+      <h1>ADMINISTRADOR</h1>
+      <span>Dashboard administrativo</span>
+    </div>
+
+    <div class="card">
+      Você está logado como <strong>Administrador</strong>.<br>
+      A partir daqui você tem acesso total ao controle do aplicativo.
+    </div>
+
+    <!-- ACESSO RÁPIDO AO PAINEL -->
+    <button class="btn btn-admin" onclick="abrirPainel()">
+      🛠️ Acessar Painel Administrativo
+    </button>
+
+    <!-- VOLTAR AO APP -->
+    <button class="btn btn-outline" onclick="voltarApp()">
+      🚗 Voltar ao App
+    </button>
+
+    <!-- SAIR -->
+    <button class="btn btn-outline" onclick="logoutAdmin()">
+      🔒 Sair
+    </button>
+
+    <div class="footer">
+      RF Driver • Administração do sistema
+    </div>
+
+  </div>
+</div>
+
 <script>
+/* ================= PROTEÇÃO ================= */
+
 const admin = JSON.parse(localStorage.getItem("adminRF"));
 
 if(!admin || admin.tipo !== "admin"){
   window.location.href = "admin-login.html";
 }
-</script>
 
-<!-- MENU SUPERIOR -->
-<div class="topbar">
-  <strong>ADMIN • RF DRIVER</strong>
-  <button onclick="irPainel()">Painel de Controle</button>
-</div>
+/* ================= AÇÕES ================= */
 
-<!-- CONTEÚDO -->
-<div class="page">
+function abrirPainel(){
+  window.location.href = "admin.html";
+}
 
-  <div class="card">
-    <h2>Bem-vindo, Administrador</h2>
-    <p>
-      Este é o <strong>Dashboard Administrativo</strong>.
-      A partir daqui você pode acessar o painel de controle,
-      gerenciar usuários e supervisionar o funcionamento do aplicativo.
-    </p>
-  </div>
-
-  <div class="card">
-    <h2>Ações rápidas</h2>
-
-    <div class="actions">
-      <button class="btn-admin" onclick="irPainel()">
-        👥 Gerenciar Usuários
-      </button>
-
-      <button class="btn-logout" onclick="logoutAdmin()">
-        🚪 Sair
-      </button>
-    </div>
-  </div>
-
-</div>
-
-<script src="core/admins.js"></script>
-
-<script>
-function irPainel(){
-  window.location.href = "admin-painel.html";
+function voltarApp(){
+  window.location.href = "index.html";
 }
 
 function logoutAdmin(){
   localStorage.removeItem("adminRF");
-  window.location.href = "admin-login.html";
+  window.location.href = "index.html";
 }
 </script>
 
