@@ -76,6 +76,11 @@ button{
   font-size:1rem;
   font-weight:800;
   color:#000;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.98);
 }
 
 .info{
@@ -108,6 +113,7 @@ button{
       id="cpf"
       placeholder="Digite seu CPF"
       maxlength="14"
+      autocomplete="off"
     >
 
     <button id="btnEntrar">
@@ -125,14 +131,26 @@ button{
   </div>
 </div>
 
+<!-- BASE LOCAL DE MOTORISTAS -->
 <script src="./core/motoristas.js"></script>
 
 <script>
+/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
+
+const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
+
+if(usuarioLogado && usuarioLogado.tipo === "motorista"){
+  window.location.href = "dashboard-motorista.html";
+}
+
+/* ================= ELEMENTOS ================= */
+
 const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnEntrar");
 const erro = document.getElementById("erro");
 
-/* Máscara simples de CPF */
+/* ================= MÁSCARA CPF ================= */
+
 cpfInput.addEventListener("input", () => {
   let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
 
@@ -143,11 +161,15 @@ cpfInput.addEventListener("input", () => {
   cpfInput.value = v;
 });
 
+/* ================= EVENTOS ================= */
+
 btn.addEventListener("click", loginMotorista);
 
 cpfInput.addEventListener("keypress", e => {
   if(e.key === "Enter") loginMotorista();
 });
+
+/* ================= LOGIN ================= */
 
 function loginMotorista(){
   erro.style.display = "none";
@@ -162,7 +184,8 @@ function loginMotorista(){
   }
 
   localStorage.setItem("usuarioRF", JSON.stringify(dados));
-  window.location.href = "index.html";
+
+  window.location.href = "dashboard-motorista.html";
 }
 </script>
 
