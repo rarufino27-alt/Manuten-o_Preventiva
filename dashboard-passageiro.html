@@ -134,15 +134,11 @@ body{
 <script>
 /* ================= PROTEÇÃO DE ACESSO ================= */
 
+// Dashboard nunca é página inicial
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-// Não logado → volta para index neutra
-if(!usuario){
-  window.location.href = "index.html";
-}
-
-// Tipo errado → volta para index neutra
-if(usuario.tipo !== "passageiro"){
+// Se não estiver logado → index neutra
+if(!usuario || usuario.tipo !== "passageiro"){
   window.location.href = "index.html";
 }
 
