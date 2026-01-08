@@ -4,17 +4,16 @@
 <meta charset="UTF-8">
 <title>Cadastro – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="./theme/theme.css">
 
 <style>
-body{
+body {
   background:#f4f4f4;
   font-family:Inter, Arial, sans-serif;
   padding:16px;
 }
 
-.card{
+.card {
   background:#fff;
   padding:22px;
   border-radius:18px;
@@ -23,12 +22,12 @@ body{
   margin:auto;
 }
 
-h1{
+h1 {
   text-align:center;
   margin-bottom:18px;
 }
 
-select,input{
+select, input {
   width:100%;
   padding:13px;
   border-radius:12px;
@@ -37,7 +36,7 @@ select,input{
   font-size:.95rem;
 }
 
-button{
+button {
   width:100%;
   padding:15px;
   border:none;
@@ -48,7 +47,7 @@ button{
   font-size:1rem;
 }
 
-.info{
+.info {
   font-size:.75rem;
   color:#666;
   text-align:center;
@@ -71,9 +70,8 @@ button{
   <input type="text" id="nome" placeholder="Nome completo">
   <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
 
-  <div id="cpfBox" style="display:none">
-    <input type="text" id="cpf" placeholder="CPF do motorista">
-  </div>
+  <!-- CPF sempre visível, não só para motorista -->
+  <input type="text" id="cpf" placeholder="CPF">
 
   <button id="btnCadastrar">Continuar</button>
 
@@ -89,33 +87,20 @@ const supabaseClient = supabase.createClient(
   "SUA_CHAVE"
 );
 
-const tipoEl = document.getElementById("tipo");
-const cpfBox = document.getElementById("cpfBox");
-const btnCadastrar = document.getElementById("btnCadastrar");
+document.getElementById("btnCadastrar").addEventListener("click", cadastrar);
 
-tipoEl.addEventListener("change", () => {
-  cpfBox.style.display = tipoEl.value === "motorista" ? "block" : "none";
-});
-
-btnCadastrar.addEventListener("click", cadastrar);
-
-async function cadastrar(){
-  const tipo = tipoEl.value;
+async function cadastrar() {
+  const tipo = document.getElementById("tipo").value;
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const cpf = document.getElementById("cpf").value.trim();
 
-  if(!tipo || !nome || !telefone){
+  if (!tipo || !nome || !telefone || !cpf) {
     alert("Preencha todos os campos obrigatórios");
     return;
   }
 
-  if(tipo === "motorista"){
-    if(!cpf){
-      alert("CPF obrigatório para motorista");
-      return;
-    }
-
+  if (tipo === "motorista") {
     const { data, error } = await supabaseClient
       .from("motoristas_autorizados")
       .select("*")
@@ -123,7 +108,7 @@ async function cadastrar(){
       .eq("ativo", true)
       .single();
 
-    if(error || !data){
+    if (error || !data) {
       alert("Motorista não autorizado");
       return;
     }
@@ -133,7 +118,7 @@ async function cadastrar(){
     tipo,
     nome,
     telefone,
-    cpf: tipo === "motorista" ? cpf : null,
+    cpf,
     ativo: true,
     created_at: new Date().toISOString()
   };
@@ -144,15 +129,16 @@ async function cadastrar(){
     .from("usuarios")
     .insert(usuario);
 
-  if(insertError){
+  if (insertError) {
     alert("Erro ao salvar cadastro");
     return;
   }
 
-if(tipo === "motorista"){
-  window.location.href = "index.html";
-}else{
-  window.location.href = "index-passageiro.html";
+  if (tipo === "motorista") {
+    window.location.href = "index.html";
+  } else {
+    window.location.href = "index-passageiro.html";
+  }
 }
 </script>
 
