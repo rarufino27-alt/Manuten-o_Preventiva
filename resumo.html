@@ -14,108 +14,18 @@ body{
   background:linear-gradient(180deg,#ffffff,#f3f3f3);
   color:#222;
 }
-
-.page{
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:18px;
-}
-
-.container{
-  width:100%;
-  max-width:420px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-
-.header{
-  text-align:center;
-  padding:18px;
-  border-radius:22px;
-  background:#fff;
-  box-shadow:0 8px 22px rgba(0,0,0,.08);
-}
-
-.header h1{
-  font-size:1.2rem;
-  font-weight:800;
-  color:#d4af37;
-}
-
-.route{
-  background:#fff;
-  border-radius:20px;
-  padding:16px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);
-  text-align:center;
-}
-
-.block{
-  background:#fff;
-  border-radius:18px;
-  padding:16px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);
-}
-
-.option{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #eee;
-  margin-bottom:8px;
-}
-
-.details{
-  font-size:.85rem;
-}
-
-.details div{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:6px;
-}
-
-.totalBox{
-  background:#fff;
-  border-radius:22px;
-  padding:22px;
-  text-align:center;
-  box-shadow:0 10px 26px rgba(0,0,0,.1);
-}
-
-.total{
-  font-size:2.2rem;
-  font-weight:800;
-  color:#d4af37;
-}
-
-.signature{
-  background:#fff;
-  border-radius:18px;
-  padding:14px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);
-  font-size:.8rem;
-}
-
-.btn-main{
-  padding:16px;
-  border-radius:18px;
-  border:none;
-  background:linear-gradient(180deg,#e6c97a,#d4af37);
-  font-size:1rem;
-  font-weight:800;
-}
-
-.btn-back{
-  padding:14px;
-  border-radius:16px;
-  border:1px solid #ccc;
-  background:#fff;
-}
+.page{min-height:100vh;display:flex;justify-content:center;padding:18px}
+.container{width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px}
+.header{text-align:center;padding:18px;border-radius:22px;background:#fff;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.header h1{font-size:1.2rem;font-weight:800;color:#d4af37}
+.route,.block,.totalBox,.signature{background:#fff;border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.option{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:14px;border:1px solid #eee;margin-bottom:8px}
+.details{font-size:.85rem}
+.details div{display:flex;justify-content:space-between;margin-bottom:6px}
+.total{font-size:2.2rem;font-weight:800;color:#d4af37;text-align:center}
+input,select{width:100%;padding:12px;border-radius:14px;border:1px solid #ccc}
+.btn-main{padding:16px;border-radius:18px;border:none;background:linear-gradient(180deg,#e6c97a,#d4af37);font-weight:800}
+.btn-back{padding:14px;border-radius:16px;border:1px solid #ccc;background:#fff}
 </style>
 </head>
 
@@ -124,15 +34,11 @@ body{
 <div class="page">
 <div class="container">
 
-  <div class="header">
-    <h1>Resumo da corrida</h1>
-  </div>
+  <div class="header"><h1>Resumo da corrida</h1></div>
 
   <div class="route">
-    <strong>📌 Origem</strong><br>
-    <span id="origemTxt"></span><br><br>
-    <strong>🏁 Destino</strong><br>
-    <span id="destinoTxt"></span>
+    <strong>📌 Origem</strong><br><span id="origemTxt"></span><br><br>
+    <strong>🏁 Destino</strong><br><span id="destinoTxt"></span>
   </div>
 
   <div class="block">
@@ -164,7 +70,12 @@ body{
 
   <div class="block">
     <label>⏱️ Tempo de espera (min)</label>
-    <input type="number" id="minutosEspera" placeholder="Ex: 10">
+    <input type="number" id="tempoEspera" placeholder="Ex: 10">
+  </div>
+
+  <div class="block">
+    <label>➕ Desvio adicional (valor manual)</label>
+    <input type="number" id="desvioExtra" placeholder="Ex: 15.00">
   </div>
 
   <div class="block">
@@ -191,10 +102,9 @@ body{
 
 <script>
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-
 const origem = App.get("origem");
 const destino = App.get("destino");
-const valorBase = Number(App.get("valorBase") || 0);
+const valorBase = Number(App.get("valorBase")||0);
 
 origemTxt.innerText = origem;
 destinoTxt.innerText = destino;
@@ -202,76 +112,69 @@ destinoTxt.innerText = destino;
 const assinatura = document.getElementById("assinatura");
 const btnWhats = document.getElementById("btnWhats");
 
-if(usuario.tipo === "motorista"){
-  assinatura.innerHTML = `
-    <strong>MOTORISTA</strong>
-    ${usuario.nome}<br>
-    Veículo: ${usuario.modelo}<br>
-    Placa: ${usuario.placa}<br>
-    CPF: ${usuario.cpfMascarado}
-  `;
-}else if(usuario.tipo === "admin"){
-  assinatura.innerHTML = `
-    <strong>ADMINISTRADOR</strong>
-    ${usuario.nome}
-  `;
+if(usuario.tipo==="motorista"){
+  assinatura.innerHTML=`<strong>MOTORISTA</strong>${usuario.nome}<br>Veículo: ${usuario.modelo}<br>Placa: ${usuario.placa}<br>CPF: ${usuario.cpfMascarado}`;
+}else if(usuario.tipo==="admin"){
+  assinatura.innerHTML=`<strong>ADMINISTRADOR</strong>${usuario.nome}`;
 }else{
-  assinatura.style.display = "none";
-  btnWhats.style.display = "none";
+  assinatura.style.display="none";
+  btnWhats.style.display="none";
 }
-
-const detalhesDiv = document.getElementById("detalhamento");
-const totalDiv = document.getElementById("total");
 
 function calcular(){
-  let total = valorBase;
-  let linhas = [];
+  let total=valorBase;
+  let d=[];
 
-  linhas.push(`🚖 *Viagem base*: R$ ${valorBase.toFixed(2)}`);
+  d.push(`🚖 *Viagem base*: R$ ${valorBase.toFixed(2)}`);
 
   if(Dinamico?.ativo){
-    const v = valorBase * (Dinamico.multiplicador - 1);
-    total += v;
-    linhas.push(`⚡ *Tarifa dinâmica*: +R$ ${v.toFixed(2)}`);
+    const v=valorBase*(Dinamico.multiplicador-1);
+    total+=v; d.push(`⚡ *Tarifa dinâmica*: +R$ ${v.toFixed(2)}`);
   }
 
-  if(tipoViagem.value !== "ida"){
-    const v = tipoViagem.value === "bate_volta" ? valorBase*0.8 :
-              tipoViagem.value === "ida_volta" ? valorBase :
-              (valorBase*2*0.1)+valorBase;
-    total += v;
-    linhas.push(`♻️ *Tipo de viagem*: +R$ ${v.toFixed(2)}`);
+  if(tipoViagem.value!=="ida"){
+    const v=tipoViagem.value==="bate_volta"?valorBase*0.8:
+            tipoViagem.value==="ida_volta"?valorBase:
+            (valorBase*2*0.1)+valorBase;
+    total+=v; d.push(`♻️ *Tipo de viagem*: +R$ ${v.toFixed(2)}`);
   }
 
-  if(desvioSimples.checked){ total+=Taxas.desvioRotaSimples; linhas.push(`🛣️ *Desvio simples*: +R$ ${Taxas.desvioRotaSimples.toFixed(2)}`); }
-  if(voltaPraia.checked){ total+=Taxas.voltaPraia; linhas.push(`🏖️ *Volta da praia*: +R$ ${Taxas.voltaPraia.toFixed(2)}`); }
-  if(taxaFeira.checked){ total+=Taxas.feira; linhas.push(`🧺 *Taxa de feira*: +R$ ${Taxas.feira.toFixed(2)}`); }
+  if(desvioSimples.checked){total+=Taxas.desvioRotaSimples;d.push(`🛣️ *Desvio simples*: +R$ ${Taxas.desvioRotaSimples.toFixed(2)}`);}
+  if(voltaPraia.checked){total+=Taxas.voltaPraia;d.push(`🏖️ *Volta da praia*: +R$ ${Taxas.voltaPraia.toFixed(2)}`);}
+  if(taxaFeira.checked){total+=Taxas.feira;d.push(`🧺 *Taxa de feira*: +R$ ${Taxas.feira.toFixed(2)}`);}
 
-  detalhesDiv.innerHTML = linhas.map(l=>`<div>${l}</div>`).join("");
-  totalDiv.innerText = `R$ ${total.toFixed(2)}`;
-  App.set("total", total);
-  window.__detalhesWhats = linhas;
+  const animal=Number(document.getElementById("animal").value||0);
+  if(animal>0){total+=animal;d.push(`🐶 *Transporte animal*: +R$ ${animal.toFixed(2)}`);}
+
+  const espera=Number(document.getElementById("tempoEspera").value||0);
+  if(espera>0){const v=espera*1; total+=v; d.push(`⏱️ *Tempo de espera*: +R$ ${v.toFixed(2)}`);}
+
+  const extra=Number(document.getElementById("desvioExtra").value||0);
+  if(extra>0){total+=extra; d.push(`➕ *Desvio adicional*: +R$ ${extra.toFixed(2)}`);}
+
+  detalhamento.innerHTML=d.map(l=>`<div>${l}</div>`).join("");
+  totalDiv.innerText=`R$ ${total.toFixed(2)}`;
+  App.set("total",total);
+  window.__whats=d;
 }
 
-document.querySelectorAll("select,input").forEach(e=>e.addEventListener("change",calcular));
+document.querySelectorAll("input,select").forEach(e=>e.addEventListener("change",calcular));
 calcular();
 
-btnWhats.onclick = ()=>{
-  const msg =
-`🚖 *RF DRIVER – RECIBO de viagem*
+btnWhats.onclick=()=>{
+  const msg=`🚖 *RF DRIVER – RECIBO de viagem*
 
 📌 *Origem*: ${origem}
 🏁 *Destino*: ${destino}
 
 *Detalhamento*
-${window.__detalhesWhats.join("\n")}
+${window.__whats.join("\n")}
 
 💰 *Total*: R$ ${App.get("total").toFixed(2)}
 
 ${assinatura.innerText}
 
 Conforto, segurança e transparência.`;
-
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 };
 </script>
