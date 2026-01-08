@@ -109,7 +109,7 @@ button:active{
     </div>
 
     <input
-      type="tel"
+      type="text"
       id="cpf"
       placeholder="Digite seu CPF"
       maxlength="14"
@@ -121,7 +121,7 @@ button:active{
     </button>
 
     <div class="error" id="erro">
-      Motorista não autorizado
+      Motorista não autorizado ou inativo
     </div>
 
     <div class="info">
@@ -131,14 +131,19 @@ button:active{
   </div>
 </div>
 
-<!-- BASE LOCAL DE MOTORISTAS -->
-<script src="./core/motoristas.js"></script>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = supabase.createClient(
+  "https://msnqiiwcityikslikbow.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+);
+</script>
 
 <script>
 /* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
 
 const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-
 if(usuarioLogado && usuarioLogado.tipo === "motorista"){
   window.location.href = "dashboard-motorista.html";
 }
@@ -153,38 +158,54 @@ const erro = document.getElementById("erro");
 
 cpfInput.addEventListener("input", () => {
   let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
-
   v = v.replace(/(\d{3})(\d)/,"$1.$2");
   v = v.replace(/(\d{3})(\d)/,"$1.$2");
   v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-
   cpfInput.value = v;
 });
 
 /* ================= EVENTOS ================= */
 
 btn.addEventListener("click", loginMotorista);
-
 cpfInput.addEventListener("keypress", e => {
   if(e.key === "Enter") loginMotorista();
 });
 
-/* ================= LOGIN ================= */
+/* ================= LOGIN MOTORISTA ================= */
 
-function loginMotorista(){
+async function loginMotorista(){
   erro.style.display = "none";
 
-  const cpfDigitado = cpfInput.value;
+  const cpf = cpfInput.value.replace(/\D/g,"");
 
-  const dados = buscarMotoristaPorCPF(cpfDigitado);
-
-  if(!dados){
+  if(cpf.length !== 11){
     erro.style.display = "block";
     return;
   }
 
-  localStorage.setItem("usuarioRF", JSON.stringify(dados));
+  const { data, error } = await supabaseClient
+    .from("usuarios")
+    .select("*")
+    .eq("cpf", cpf)
+    .eq("tipo", "motorista")
+    .eq("ativo", true)
+    .single();
 
+  if(error || !data){
+    erro.style.display = "block";
+    return;
+  }
+
+  const usuario = {
+    tipo: "motorista",
+    nome: data.nome,
+    telefone: data.telefone,
+    cpf: data.cpf,
+    placa: data.placa,
+    modelo: data.modelo_carro
+  };
+
+  localStorage.setItem("usuarioRF", JSON.stringify(usuario));
   window.location.href = "dashboard-motorista.html";
 }
 </script>
