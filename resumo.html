@@ -30,7 +30,6 @@ body{
   gap:16px;
 }
 
-/* HEADER */
 .header{
   text-align:center;
   padding:18px;
@@ -50,7 +49,6 @@ body{
   color:#666;
 }
 
-/* ROTA */
 .route{
   background:#fff;
   border-radius:20px;
@@ -59,7 +57,6 @@ body{
   text-align:center;
 }
 
-/* BLOCOS */
 .block{
   background:#fff;
   border-radius:18px;
@@ -67,37 +64,6 @@ body{
   box-shadow:0 6px 18px rgba(0,0,0,.06);
 }
 
-label{
-  font-size:.8rem;
-  font-weight:700;
-  margin-bottom:6px;
-  display:block;
-}
-
-/* INPUTS */
-select,
-input[type="number"]{
-  width:100%;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #ccc;
-  background:#fff;
-  color:#000;
-  font-size:.95rem;
-}
-
-/* OPÇÕES */
-.option{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #eee;
-  margin-bottom:8px;
-}
-
-/* DETALHAMENTO */
 .details{
   font-size:.85rem;
 }
@@ -108,7 +74,6 @@ input[type="number"]{
   margin-bottom:6px;
 }
 
-/* TOTAL */
 .totalBox{
   background:#fff;
   border-radius:22px;
@@ -123,7 +88,6 @@ input[type="number"]{
   color:#d4af37;
 }
 
-/* ASSINATURA */
 .signature{
   background:#fff;
   border-radius:18px;
@@ -138,7 +102,6 @@ input[type="number"]{
   margin-bottom:4px;
 }
 
-/* BOTÕES */
 .btn-main{
   padding:16px;
   border-radius:18px;
@@ -177,38 +140,6 @@ input[type="number"]{
   </div>
 
   <div class="block">
-    <label>🚖 Tipo de viagem</label>
-    <select id="tipoViagem">
-      <option value="ida">Ida</option>
-      <option value="bate_volta">Bate e volta (+80%)</option>
-      <option value="ida_volta">Ida e volta (x2)</option>
-      <option value="ida_volta_espera">Ida e volta + espera (10%)</option>
-    </select>
-  </div>
-
-  <div class="block">
-    <div class="option"><span>🛣️ Desvio simples</span><input type="checkbox" id="desvioSimples"></div>
-    <div class="option"><span>🏖️ Volta da praia</span><input type="checkbox" id="voltaPraia"></div>
-    <div class="option"><span>🧺 Taxa de feira</span><input type="checkbox" id="taxaFeira"></div>
-  </div>
-
-  <div class="block">
-    <label>🐶 Transporte de animal</label>
-    <select id="animal">
-      <option value="0">Não</option>
-      <option value="5">Pequeno</option>
-      <option value="7">Médio</option>
-      <option value="10">Grande</option>
-      <option value="20">Viagem longa</option>
-    </select>
-  </div>
-
-  <div class="block">
-    <label>⏱️ Tempo de espera (min)</label>
-    <input type="number" id="minutosEspera" placeholder="Ex: 10">
-  </div>
-
-  <div class="block">
     <strong>Detalhamento</strong>
     <div class="details" id="detalhamento"></div>
   </div>
@@ -217,7 +148,6 @@ input[type="number"]{
     <div class="total" id="total">R$ 0,00</div>
   </div>
 
-  <!-- ASSINATURA -->
   <div class="signature" id="assinatura"></div>
 
   <button id="btnWhats" class="btn-main">
@@ -231,35 +161,35 @@ input[type="number"]{
 </div>
 </div>
 
-<script src="core/motoristas.js"></script>
 <script src="core/global.js"></script>
 <script src="core/taxas.js"></script>
 <script src="core/dinamico.js"></script>
 
 <script>
-/* ================= USUÁRIO ================= */
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+const admin = JSON.parse(localStorage.getItem("adminRF"));
 
-if(!usuario){
-  window.location.href = "cadastro.html";
+if(!usuario && !admin){
+  window.location.href = "index.html";
 }
 
-/* ================= DADOS ================= */
 const origem = App.get("origem");
 const destino = App.get("destino");
 const valorBase = Number(App.get("valorBase") || 0);
 
-if(!origem || !destino){
-  App.go("index.html");
-}
-
 origemTxt.innerText = origem;
 destinoTxt.innerText = destino;
 
-/* ================= ASSINATURA ================= */
 const assinaturaDiv = document.getElementById("assinatura");
+const btnWhats = document.getElementById("btnWhats");
 
-if(usuario.tipo === "motorista"){
+let emissor = null;
+let tipoEmissor = null;
+
+if(usuario && usuario.tipo === "motorista"){
+  emissor = usuario;
+  tipoEmissor = "MOTORISTA";
+
   assinaturaDiv.innerHTML = `
     <strong>Motorista responsável</strong>
     ${usuario.nome}<br>
@@ -267,103 +197,41 @@ if(usuario.tipo === "motorista"){
     Placa: ${usuario.placa}<br>
     CPF: ${usuario.cpfMascarado}
   `;
-}else{
+}
+
+if(admin){
+  emissor = admin;
+  tipoEmissor = "ADMINISTRADOR";
+
+  assinaturaDiv.innerHTML = `
+    <strong>Administrador responsável</strong>
+    ${admin.nome}
+  `;
+}
+
+if(!emissor){
   assinaturaDiv.style.display = "none";
-  document.getElementById("btnWhats").style.display = "none";
+  btnWhats.style.display = "none";
 }
 
-/* ================= ELEMENTOS ================= */
-const tipoViagem = document.getElementById("tipoViagem");
-const desvioSimples = document.getElementById("desvioSimples");
-const voltaPraia = document.getElementById("voltaPraia");
-const taxaFeira = document.getElementById("taxaFeira");
-const animalSel = document.getElementById("animal");
-const minutosEspera = document.getElementById("minutosEspera");
-const detalheDiv = document.getElementById("detalhamento");
-const totalDiv = document.getElementById("total");
-const btnWhats = document.getElementById("btnWhats");
+let total = valorBase;
+const detalhes = [
+  `🚖 Viagem base: R$ ${valorBase.toFixed(2)}`
+];
 
-let detalhesWhats = [];
-
-/* ================= CÁLCULO ================= */
-function calcular(){
-  let total = valorBase;
-  let detalhes = [];
-  detalhesWhats = [];
-
-  // Viagem base
-  detalhes.push({ label: "🚖 Viagem base", valor: valorBase, prefix: "" });
-
-  // Tarifa dinâmica
-  if (Dinamico?.ativo) {
-    const acres = valorBase * (Dinamico.multiplicador - 1);
-    total += acres;
-    detalhes.push({ label: "⚡ Tarifa dinâmica", valor: acres, prefix: "+" });
-  }
-
-  // Tipo de viagem
-  if (tipoViagem.value === "bate_volta") {
-    const acres = valorBase * 0.8;
-    total += acres;
-    detalhes.push({ label: "♻️ Tipo de viagem", valor: acres, prefix: "+" });
-  }
-
-  if (tipoViagem.value === "ida_volta") {
-    const acres = valorBase;
-    total += acres;
-    detalhes.push({ label: "♻️ Tipo de viagem", valor: acres, prefix: "+" });
-  }
-
-  if (tipoViagem.value === "ida_volta_espera") {
-    const acres = (valorBase * 2 * 0.1) + valorBase;
-    total += acres;
-    detalhes.push({ label: "♻️ Tipo de viagem", valor: acres, prefix: "+" });
-  }
-
-  // Taxas
-  if (desvioSimples.checked) {
-    total += Taxas.desvioRotaSimples;
-    detalhes.push({ label: "🛣️ Desvio simples", valor: Taxas.desvioRotaSimples, prefix: "+" });
-  }
-
-  if (voltaPraia.checked) {
-    total += Taxas.voltaPraia;
-    detalhes.push({ label: "🏖️ Volta da praia", valor: Taxas.voltaPraia, prefix: "+" });
-  }
-
-  if (taxaFeira.checked) {
-    total += Taxas.feira;
-    detalhes.push({ label: "🧺 Taxa de feira", valor: Taxas.feira, prefix: "+" });
-  }
-
-  // Renderiza tela
-  detalheDiv.innerHTML = detalhes.map(d => `
-    <div>
-      <span>${d.label}</span>
-      <strong>${d.prefix}R$ ${d.valor.toFixed(2)}</strong>
-    </div>
-  `).join("");
-
-  // Prepara WhatsApp
-  detalhesWhats = detalhes.map(d =>
-    `${d.label}: ${d.prefix}R$ ${d.valor.toFixed(2)}`
-  );
-
-  totalDiv.innerText = `R$ ${total.toFixed(2)}`;
-  App.set("total", total);
+if(Dinamico?.ativo){
+  const acres = valorBase * (Dinamico.multiplicador - 1);
+  total += acres;
+  detalhes.push(`⚡ Tarifa dinâmica: +R$ ${acres.toFixed(2)}`);
 }
 
-document.querySelectorAll("select,input").forEach(el=>{
-  el.addEventListener("change", calcular);
-});
+document.getElementById("detalhamento").innerHTML =
+  detalhes.map(d => `<div><span>${d}</span></div>`).join("");
 
-calcular();
+document.getElementById("total").innerText = `R$ ${total.toFixed(2)}`;
+App.set("total", total);
 
-/* ================= WHATSAPP ================= */
 btnWhats.onclick = () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
-  if (usuario.tipo !== "motorista") return;
-
   const msg =
 `🚖 *RF DRIVER – RECIBO de viagem*
 
@@ -371,21 +239,15 @@ btnWhats.onclick = () => {
 🏁 *Destino*: ${destino}
 
 *Detalhamento*
-${detalhesWhats.map(l => `• ${l}`).join("\n")}
+${detalhes.map(d => `• ${d}`).join("\n")}
 
-💰 *Total*: R$ ${App.get("total").toFixed(2)}
+💰 *Total*: R$ ${total.toFixed(2)}
 
-*MOTORISTA* ${usuario.nome}
-*VEICULO* ${usuario.modelo}
-*PLACA* ${usuario.placa}
-*CPF* ${usuario.cpfMascarado}
+*${tipoEmissor}* ${emissor.nome}
 
 Conforto, segurança e transparência.`;
 
-  window.open(
-    "https://wa.me/?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
+  window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
 };
 </script>
 
