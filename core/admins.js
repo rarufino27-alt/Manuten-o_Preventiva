@@ -11,6 +11,13 @@ const Admins = [
     nome: "Rafael Felipe",
     ativo: true
   }
+
+{
+    usuario: "Andrea",
+    senha: "rf145355",
+    nome: "Andréa Barbosa",
+    ativo: true
+  }
 ];
 
 /**
