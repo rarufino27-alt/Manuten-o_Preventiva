@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>RF Driver – Mobilidade com excelência</title>
+<title>Motorista – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- PWA -->
@@ -15,16 +15,12 @@
 <link rel="apple-touch-icon" href="./icons/192.png">
 
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
 :root{
   --gold:#D4AF37;
   --gold-soft:#E6C97A;
-  --bg:#F5F5F5;
   --text:#444;
-  --dark:#111;
 }
 
 @keyframes fadeUp{
@@ -43,8 +39,7 @@
 }
 
 body{
-  background:
-    radial-gradient(circle at top,#ffffff 0%,#f2f2f2 60%,#eaeaea 100%);
+  background:radial-gradient(circle at top,#ffffff,#f2f2f2 60%,#eaeaea);
   color:var(--text);
 }
 
@@ -110,23 +105,18 @@ body{
   border:none;
   box-shadow:0 10px 20px rgba(212,175,55,.35);
   animation:fadeUp .9s ease, pulseGlow 3s ease infinite;
-}
-
-.primary-action:active{
-  transform:scale(.97);
+  cursor:pointer;
 }
 
 .secondary{
   display:flex;
   gap:12px;
-  animation:fadeUp 1.1s ease;
 }
 
 .footer{
   text-align:center;
   font-size:.75rem;
   color:#777;
-  animation:fadeUp 1.3s ease;
 }
 </style>
 </head>
@@ -138,7 +128,7 @@ body{
 
     <div class="hero">
       <div class="hero-title">RF DRIVER</div>
-      <div class="hero-sub">Mobilidade com excelência</div>
+      <div class="hero-sub">Painel do motorista</div>
 
       <div class="trust">
         <span>🔒 Seguro</span>
@@ -149,7 +139,7 @@ body{
       </div>
     </div>
 
-    <button class="btn primary-action" id="btnIniciar">
+    <button class="primary-action" id="btnIniciar">
       ▶ Iniciar cálculo de corrida
     </button>
 
@@ -170,33 +160,31 @@ body{
 </div>
 
 <script src="core/global.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/auth.js"></script>
 
 <script>
-document.getElementById("btnIniciar").onclick = async () => {
-  const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+/* ================= PROTEÇÃO DE ACESSO ================= */
 
-  if(!usuario){
-    window.location.href = "login-motorista.html";
-    return;
-  }
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-  if(usuario.tipo !== "motorista"){
-    window.location.href = "index-passageiro.html";
-    return;
-  }
+// Não logado → index neutra
+if(!usuario){
+  window.location.href = "index.html";
+}
 
-  const valido = await validarUsuarioAtivo();
+// Tipo errado → index neutra
+if(usuario.tipo !== "motorista"){
+  window.location.href = "index.html";
+}
 
-  if(valido){
-    App.reset();
-    App.go("origem.html");
-  }
+/* ================= AÇÕES ================= */
+
+document.getElementById("btnIniciar").onclick = () => {
+  App.reset();
+  App.go("origem.html");
 };
 
 function abrirRegras(){
-  App.go("regras-motorista.html");
+  window.location.href = "regras-motorista.html";
 }
 </script>
 
