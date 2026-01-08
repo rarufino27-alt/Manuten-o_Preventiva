@@ -99,17 +99,14 @@ body{
       A partir daqui você tem acesso total ao controle do aplicativo.
     </div>
 
-    <!-- ACESSO RÁPIDO AO PAINEL -->
     <button class="btn btn-admin" onclick="abrirPainel()">
       🛠️ Acessar Painel Administrativo
     </button>
 
-    <!-- VOLTAR AO APP -->
     <button class="btn btn-outline" onclick="voltarApp()">
       🚗 Voltar ao App
     </button>
 
-    <!-- SAIR -->
     <button class="btn btn-outline" onclick="logoutAdmin()">
       🔒 Sair
     </button>
@@ -123,6 +120,9 @@ body{
 
 <script>
 /* ================= PROTEÇÃO ================= */
+
+// 🔒 ADMIN NÃO PODE CONVIVER COM usuarioRF
+localStorage.removeItem("usuarioRF");
 
 const admin = JSON.parse(localStorage.getItem("adminRF"));
 
