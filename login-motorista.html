@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
-<link rel="stylesheet" href="./theme/layout.css">
-<link rel="stylesheet" href="./theme/components.css">
 
 <style>
 body{
@@ -15,7 +13,6 @@ body{
   font-family:Inter, Arial, sans-serif;
   color:#222;
 }
-
 .page{
   min-height:100vh;
   display:flex;
@@ -23,7 +20,6 @@ body{
   justify-content:center;
   padding:22px;
 }
-
 .card{
   width:100%;
   max-width:380px;
@@ -34,32 +30,14 @@ body{
   display:flex;
   flex-direction:column;
   gap:18px;
-  animation:fadeUp .6s ease;
 }
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-.logo{
-  text-align:center;
-}
-
+.logo{text-align:center}
 .logo h1{
   font-size:1.6rem;
   font-weight:900;
   letter-spacing:2px;
-  background:linear-gradient(180deg,#D4AF37,#E6C97A);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  color:#D4AF37;
 }
-
-.logo span{
-  font-size:.8rem;
-  color:#666;
-}
-
 input{
   width:100%;
   padding:14px;
@@ -67,7 +45,6 @@ input{
   border:1px solid #ccc;
   font-size:1rem;
 }
-
 button{
   padding:16px;
   border-radius:18px;
@@ -75,20 +52,8 @@ button{
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
   font-size:1rem;
   font-weight:800;
-  color:#000;
   cursor:pointer;
 }
-
-button:active{
-  transform:scale(.98);
-}
-
-.info{
-  font-size:.75rem;
-  color:#666;
-  text-align:center;
-}
-
 .error{
   color:#c62828;
   font-size:.8rem;
@@ -104,59 +69,33 @@ button:active{
   <div class="card">
 
     <div class="logo">
-      <h1>RF DRIVER</h1>
-      <span>Login do motorista</span>
+      <h1>MOTORISTA</h1>
+      <span>Login por CPF</span>
     </div>
 
-    <input
-      type="text"
-      id="cpf"
-      placeholder="Digite seu CPF"
-      maxlength="14"
-      autocomplete="off"
-    >
+    <input id="cpf" placeholder="Digite seu CPF" maxlength="14">
+    <button id="btnEntrar">Entrar</button>
 
-    <button id="btnEntrar">
-      Entrar
-    </button>
-
-    <div class="error" id="erro">
-      Motorista não autorizado ou inativo
-    </div>
-
-    <div class="info">
-      Acesso exclusivo para motoristas cadastrados
-    </div>
+    <div class="error" id="erro">Motorista não autorizado</div>
 
   </div>
 </div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+  "SUA_ANON_KEY_AQUI"
 );
-</script>
 
-<script>
-/* ================= AUTO-REDIRECT SE JÁ LOGADO ================= */
-
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "motorista"){
-  window.location.href = "dashboard-motorista.html";
-}
-
-/* ================= ELEMENTOS ================= */
+const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
 const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnEntrar");
 const erro = document.getElementById("erro");
 
-/* ================= MÁSCARA CPF ================= */
-
-cpfInput.addEventListener("input", () => {
+/* máscara CPF */
+cpfInput.addEventListener("input", ()=>{
   let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
   v = v.replace(/(\d{3})(\d)/,"$1.$2");
   v = v.replace(/(\d{3})(\d)/,"$1.$2");
@@ -164,22 +103,12 @@ cpfInput.addEventListener("input", () => {
   cpfInput.value = v;
 });
 
-/* ================= EVENTOS ================= */
-
-btn.addEventListener("click", loginMotorista);
-cpfInput.addEventListener("keypress", e => {
-  if(e.key === "Enter") loginMotorista();
-});
-
-/* ================= LOGIN MOTORISTA ================= */
-
-async function loginMotorista(){
-  erro.style.display = "none";
+btn.onclick = async ()=>{
+  erro.style.display="none";
 
   const cpf = cpfInput.value.replace(/\D/g,"");
-
   if(cpf.length !== 11){
-    erro.style.display = "block";
+    erro.style.display="block";
     return;
   }
 
@@ -189,25 +118,26 @@ async function loginMotorista(){
     .eq("cpf", cpf)
     .eq("tipo", "motorista")
     .eq("ativo", true)
+    .eq("grupo_id", GRUPO_ID)
     .single();
 
   if(error || !data){
-    erro.style.display = "block";
+    erro.style.display="block";
     return;
   }
 
-  const usuario = {
+  localStorage.setItem("usuarioRF", JSON.stringify({
     tipo: "motorista",
+    id: data.id,
     nome: data.nome,
-    telefone: data.telefone,
     cpf: data.cpf,
     placa: data.placa,
-    modelo: data.modelo_carro
-  };
+    modelo: data.modelo_carro,
+    grupo_id: data.grupo_id
+  }));
 
-  localStorage.setItem("usuarioRF", JSON.stringify(usuario));
   window.location.href = "dashboard-motorista.html";
-}
+};
 </script>
 
 </body>
