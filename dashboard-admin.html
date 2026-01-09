@@ -12,7 +12,6 @@ body{
   background:linear-gradient(180deg,#ffffff,#f3f3f3);
   font-family:Inter, Arial, sans-serif;
 }
-
 .page{
   min-height:100vh;
   display:flex;
@@ -20,54 +19,43 @@ body{
   align-items:center;
   padding:20px;
 }
-
 .box{
-  background:#fff;
-  padding:30px 26px;
-  border-radius:26px;
-  box-shadow:0 14px 36px rgba(0,0,0,.12);
+  width:100%;
   max-width:420px;
-  width:100%;
-  text-align:center;
+  background:#fff;
+  border-radius:26px;
+  padding:30px 24px;
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
 }
-
 h1{
+  text-align:center;
   font-size:1.6rem;
-  font-weight:900;
-  color:#000;
-  margin-bottom:6px;
 }
-
-p{
-  font-size:.9rem;
-  color:#555;
-  margin-bottom:22px;
-}
-
 button{
-  width:100%;
   padding:16px;
   border-radius:18px;
   border:none;
   font-weight:800;
-  font-size:1rem;
   cursor:pointer;
-  margin-bottom:12px;
 }
-
-.btn-primary{
+.primary{
   background:#111;
   color:#fff;
 }
-
-.btn-gold{
-  background:linear-gradient(180deg,#E6C97A,#D4AF37);
-  color:#000;
+.gold{
+  background:#d4af37;
 }
-
-.btn-outline{
+.outline{
   background:#fff;
   border:1px solid #ccc;
+}
+.footer{
+  text-align:center;
+  font-size:.75rem;
+  color:#777;
 }
 </style>
 </head>
@@ -78,26 +66,40 @@ button{
   <div class="box">
 
     <h1>ADMINISTRADOR</h1>
-    <p id="nomeAdmin"></p>
+    <p id="nome"></p>
 
-    <button class="btn-gold" onclick="iniciarCalculo()">
-      ▶ Iniciar cálculo de corrida
+    <button class="primary" onclick="abrirPainel()">
+      🛠️ Painel Administrativo
     </button>
 
-    <button class="btn-primary" onclick="abrirPainel()">
-      🛠️ Acessar Painel Administrativo
+    <button class="gold" onclick="iniciarCalculo()">
+      ▶ Iniciar cálculo
     </button>
 
-    <button class="btn-outline" onclick="sair()">
+    <button class="outline" onclick="regrasMotorista()">
+      📋 Regras do motorista
+    </button>
+
+    <button class="outline" onclick="regrasPassageiro()">
+      📋 Regras do passageiro
+    </button>
+
+    <a class="outline btn" href="instalar-app.html">
+      📲 Instalar App
+    </a>
+
+    <button class="outline" onclick="sair()">
       🔒 Sair
     </button>
+
+    <div class="footer">
+      RF Driver • Controle administrativo
+    </div>
 
   </div>
 </div>
 
 <script>
-/* ================= PROTEÇÃO ================= */
-
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
 if(!usuario || usuario.tipo !== "admin"){
@@ -105,24 +107,20 @@ if(!usuario || usuario.tipo !== "admin"){
   window.location.href = "index.html";
 }
 
-/* ================= UI ================= */
-
-document.getElementById("nomeAdmin").innerText =
-  `Olá, ${usuario.nome}`;
-
-/* ================= AÇÕES ================= */
-
-function iniciarCalculo(){
-  localStorage.removeItem("origem");
-  localStorage.removeItem("destino");
-  localStorage.removeItem("valorBase");
-  window.location.href = "origem.html";
-}
+document.getElementById("nome").innerText = usuario.nome;
 
 function abrirPainel(){
   window.location.href = "admin-painel.html";
 }
-
+function iniciarCalculo(){
+  window.location.href = "origem.html";
+}
+function regrasMotorista(){
+  window.location.href = "regras-motorista.html";
+}
+function regrasPassageiro(){
+  window.location.href = "regras-passageiro.html";
+}
 function sair(){
   localStorage.clear();
   window.location.href = "index.html";
