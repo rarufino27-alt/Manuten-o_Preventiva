@@ -32,12 +32,6 @@ body{
   display:flex;
   flex-direction:column;
   gap:18px;
-  animation:fadeUp .6s ease;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
 }
 
 .logo{
@@ -69,20 +63,13 @@ button{
   border-radius:18px;
   border:none;
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
-  font-size:1rem;
   font-weight:800;
-  color:#000;
+  font-size:1rem;
   cursor:pointer;
 }
 
 button:active{
   transform:scale(.98);
-}
-
-.info{
-  font-size:.75rem;
-  color:#666;
-  text-align:center;
 }
 
 .error{
@@ -101,34 +88,38 @@ button:active{
 
     <div class="logo">
       <h1>PASSAGEIRO</h1>
-      <span>Acesso para usuário já cadastrado</span>
+      <span>Acesso ao aplicativo</span>
     </div>
 
     <input
-      type="tel"
-      id="telefone"
-      placeholder="Digite seu telefone (DDD)"
+      id="cpf"
+      placeholder="Digite seu CPF"
+      maxlength="14"
       autocomplete="off"
     >
 
-    <button id="btnEntrar">
-      Entrar
-    </button>
+    <button id="btnEntrar">Entrar</button>
 
     <div class="error" id="erro">
-      Passageiro não encontrado ou acesso bloqueado
-    </div>
-
-    <div class="info">
-      Use este acesso apenas se você já se cadastrou anteriormente.
+      Passageiro não autorizado
     </div>
 
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/supabase.js"></script>
+<script>
+/* ================= CONFIGURAÇÃO ================= */
+
+const supabaseClient = supabase.createClient(
+  "https://msnqiiwcityikslikbow.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+);
+
+// 🔴 GRUPO BASE – RF DRIVER
+const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+</script>
 
 <script>
 /* ================= AUTO-REDIRECT ================= */
@@ -140,26 +131,34 @@ if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
 
 /* ================= ELEMENTOS ================= */
 
-const telInput = document.getElementById("telefone");
+const cpfInput = document.getElementById("cpf");
 const btn = document.getElementById("btnEntrar");
 const erro = document.getElementById("erro");
 
-/* ================= EVENTOS ================= */
+/* ================= MÁSCARA CPF ================= */
 
-btn.addEventListener("click", loginPassageiro);
-telInput.addEventListener("keypress", e=>{
-  if(e.key === "Enter") loginPassageiro();
+cpfInput.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value = v;
 });
 
-/* ================= LOGIN ================= */
+/* ================= LOGIN PASSAGEIRO ================= */
+
+btn.addEventListener("click", loginPassageiro);
+cpfInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginPassageiro();
+});
 
 async function loginPassageiro(){
   erro.style.display = "none";
 
-  const telefone = telInput.value.replace(/\D/g,"");
+  const cpf = cpfInput.value.replace(/\D/g,"");
 
-  if(telefone.length < 10){
-    erro.innerText = "Telefone inválido";
+  if(cpf.length !== 11){
+    erro.innerText = "CPF inválido";
     erro.style.display = "block";
     return;
   }
@@ -167,23 +166,26 @@ async function loginPassageiro(){
   const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .eq("telefone", telefone)
+    .eq("cpf", cpf)
     .eq("tipo", "passageiro")
     .eq("ativo", true)
-    .maybeSingle();
+    .eq("grupo_id", GRUPO_ID)
+    .single();
 
   if(error || !data){
     erro.style.display = "block";
     return;
   }
 
-  const usuario = {
-    tipo: "passageiro",
+  localStorage.setItem("usuarioRF", JSON.stringify({
+    id: data.id,
+    tipo: data.tipo,
     nome: data.nome,
-    telefone: data.telefone
-  };
+    cpf: data.cpf,
+    telefone: data.telefone,
+    grupo_id: data.grupo_id
+  }));
 
-  localStorage.setItem("usuarioRF", JSON.stringify(usuario));
   window.location.href = "dashboard-passageiro.html";
 }
 </script>
