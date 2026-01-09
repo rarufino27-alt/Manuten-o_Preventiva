@@ -67,10 +67,23 @@ button:active{
 <div class="card">
   <h1>Cadastro de Passageiro</h1>
 
-  <input type="text" id="nome" placeholder="Nome completo">
-  <input type="tel" id="telefone" placeholder="Telefone (com DDD)">
+  <input
+    type="text"
+    id="nome"
+    placeholder="Nome completo"
+    autocomplete="name"
+  >
 
-  <button id="btnCadastrar">Finalizar cadastro</button>
+  <input
+    type="tel"
+    id="telefone"
+    placeholder="Telefone com DDD"
+    autocomplete="tel"
+  >
+
+  <button id="btnCadastrar">
+    Finalizar cadastro
+  </button>
 
   <div class="info">
     Este cadastro é feito apenas uma vez.<br>
@@ -83,11 +96,38 @@ button:active{
 <script src="core/supabase.js"></script>
 
 <script>
+/* ================= CONFIG ================= */
+
+// ID FIXO DO GRUPO RF DRIVER
+const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+
+/* ================= ELEMENTOS ================= */
+
 const nomeInput = document.getElementById("nome");
 const telInput = document.getElementById("telefone");
 const btn = document.getElementById("btnCadastrar");
 
+/* ================= MÁSCARA TELEFONE ================= */
+
+telInput.addEventListener("input", () => {
+  let v = telInput.value.replace(/\D/g,"").slice(0,11);
+
+  if(v.length > 10){
+    v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+  }else if(v.length > 6){
+    v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
+  }else if(v.length > 2){
+    v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
+  }
+
+  telInput.value = v;
+});
+
+/* ================= EVENTO ================= */
+
 btn.addEventListener("click", cadastrar);
+
+/* ================= CADASTRO ================= */
 
 async function cadastrar(){
   const nome = nomeInput.value.trim();
@@ -98,12 +138,13 @@ async function cadastrar(){
     return;
   }
 
-  /* 🔎 Verifica se telefone já existe */
+  /* 🔎 Verifica se telefone já existe no grupo */
   const { data: existente, error: selectError } = await supabaseClient
     .from("usuarios")
     .select("id")
     .eq("telefone", telefone)
     .eq("tipo", "passageiro")
+    .eq("grupo_id", GRUPO_ID)
     .maybeSingle();
 
   if(selectError){
@@ -118,11 +159,13 @@ async function cadastrar(){
     return;
   }
 
+  /* ✅ OBJETO CORRETO (COM GRUPO_ID) */
   const novoUsuario = {
     tipo: "passageiro",
-    nome,
-    telefone,
-    ativo: true
+    nome: nome,
+    telefone: telefone,
+    ativo: true,
+    grupo_id: GRUPO_ID
   };
 
   const { error: insertError } = await supabaseClient
@@ -135,6 +178,7 @@ async function cadastrar(){
     return;
   }
 
+  /* LOGIN AUTOMÁTICO */
   localStorage.setItem("usuarioRF", JSON.stringify(novoUsuario));
   window.location.href = "dashboard-passageiro.html";
 }
