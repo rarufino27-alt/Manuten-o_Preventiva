@@ -1,5 +1,3 @@
- src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 /* ================= SUPABASE CONFIG GLOBAL ================= */
 
 // 🔒 SUPABASE FIXO (RF DRIVER)
@@ -9,7 +7,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 🧠 GRUPO FIXO (RF Driver)
 const GRUPO_ID_FIXO = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-// Cliente Supabase
+// Cliente Supabase (a lib vem do HTML)
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -17,7 +15,7 @@ const supabaseClient = supabase.createClient(
 
 /* ================= HELPERS ================= */
 
-// Retorna grupo atual (fixo por enquanto)
+// Retorna grupo atual
 function getGrupoId(){
   return GRUPO_ID_FIXO;
 }
@@ -26,7 +24,7 @@ function getGrupoId(){
 function montarUsuarioBase(dados){
   return {
     ...dados,
-    grupo_id: getGrupoId(),
+    grupo_id: GRUPO_ID_FIXO,
     ativo: true
   };
 }
