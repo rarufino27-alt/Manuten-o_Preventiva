@@ -13,6 +13,7 @@ body{
   font-family:Inter, Arial, sans-serif;
   color:#000;
 }
+
 .page{
   min-height:100vh;
   display:flex;
@@ -20,6 +21,7 @@ body{
   justify-content:center;
   padding:22px;
 }
+
 .card{
   width:100%;
   max-width:380px;
@@ -31,16 +33,21 @@ body{
   flex-direction:column;
   gap:18px;
 }
+
 .logo{text-align:center}
+
 .logo h1{
   font-size:1.6rem;
   font-weight:900;
   letter-spacing:2px;
+  color:#000;
 }
+
 .logo span{
   font-size:.85rem;
   color:#555;
 }
+
 input{
   width:100%;
   padding:14px;
@@ -49,6 +56,7 @@ input{
   font-size:1rem;
   color:#000;
 }
+
 button{
   padding:16px;
   border-radius:18px;
@@ -56,8 +64,10 @@ button{
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
   font-size:1rem;
   font-weight:800;
+  color:#000;
   cursor:pointer;
 }
+
 .error{
   color:#c62828;
   font-size:.8rem;
@@ -93,17 +103,15 @@ button{
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL ÚNICO -->
+<!-- ORDEM CORRETA (CRÍTICO) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./core/supabase.js"></script>
+
 <script>
-/* ================= CONFIG ================= */
+/* ================= AUTO REDIRECT ================= */
 
-const GRUPO_ID = getGrupoId();
-
-/* ================= AUTO-REDIRECT ================= */
-
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
+const usuarioAtual = getUsuarioLogado();
+if (usuarioAtual && usuarioAtual.tipo === "passageiro") {
   window.location.href = "dashboard-passageiro.html";
 }
 
@@ -113,20 +121,20 @@ const telefoneInput = document.getElementById("telefone");
 const erro = document.getElementById("erro");
 const btn = document.getElementById("btnEntrar");
 
-/* ================= MÁSCARA TELEFONE ================= */
+/* ================= MÁSCARA ================= */
 
-telefoneInput.addEventListener("input", ()=>{
-  telefoneInput.value = telefoneInput.value.replace(/\D/g,"").slice(0,11);
+telefoneInput.addEventListener("input", () => {
+  telefoneInput.value = telefoneInput.value.replace(/\D/g, "").slice(0, 11);
 });
 
 /* ================= LOGIN ================= */
 
-btn.onclick = async () => {
+btn.addEventListener("click", async () => {
   erro.style.display = "none";
 
-  const telefone = telefoneInput.value.replace(/\D/g,"");
+  const telefone = telefoneInput.value;
 
-  if(telefone.length < 10){
+  if (telefone.length < 10) {
     erro.innerText = "Telefone inválido";
     erro.style.display = "block";
     return;
@@ -138,24 +146,17 @@ btn.onclick = async () => {
     .eq("telefone", telefone)
     .eq("tipo", "passageiro")
     .eq("ativo", true)
-    .eq("grupo_id", GRUPO_ID)
-    .maybeSingle(); // ✅ AQUI ESTÁ A CORREÇÃO CRÍTICA
+    .eq("grupo_id", getGrupoId())
+    .single();
 
-  if(error){
-    console.error("Erro Supabase:", error);
+  if (error || !data) {
     erro.style.display = "block";
     return;
   }
 
-  if(!data){
-    erro.style.display = "block";
-    return;
-  }
-
-  // ✅ LOGIN OK
-  localStorage.setItem("usuarioRF", JSON.stringify(data));
+  setUsuarioLogado(data);
   window.location.href = "dashboard-passageiro.html";
-};
+});
 </script>
 
 </body>
