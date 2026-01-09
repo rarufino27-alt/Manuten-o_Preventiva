@@ -2,88 +2,112 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cadastro – RF Driver</title>
+<title>Login Passageiro – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
 
 <style>
 body{
-  background:#f4f4f4;
+  background:radial-gradient(circle at top,#ffffff,#f2f2f2);
   font-family:Inter, Arial, sans-serif;
-  padding:16px;
   color:#000;
 }
-.card{
-  background:#fff;
+.page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding:22px;
-  border-radius:18px;
-  box-shadow:0 6px 20px rgba(0,0,0,.08);
-  max-width:420px;
-  margin:auto;
 }
-h1{
-  text-align:center;
-  margin-bottom:18px;
+.card{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  border-radius:26px;
+  padding:28px 22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.logo{text-align:center}
+.logo h1{
+  font-size:1.6rem;
+  font-weight:900;
+  letter-spacing:2px;
+}
+.logo span{
+  font-size:.8rem;
+  color:#555;
 }
 input{
   width:100%;
-  padding:13px;
-  border-radius:12px;
+  padding:14px;
+  border-radius:16px;
   border:1px solid #ccc;
-  margin-bottom:14px;
-  font-size:.95rem;
+  font-size:1rem;
   color:#000;
 }
 button{
-  width:100%;
-  padding:15px;
+  padding:16px;
+  border-radius:18px;
   border:none;
-  border-radius:14px;
-  font-weight:700;
-  background:#d4af37;
-  color:#000;
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
   font-size:1rem;
+  font-weight:800;
   cursor:pointer;
 }
-button:active{transform:scale(.98)}
-.info{
-  font-size:.75rem;
-  color:#555;
+.error{
+  color:#c62828;
+  font-size:.8rem;
   text-align:center;
-  margin-top:10px;
+  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>Cadastro de Passageiro</h1>
+<div class="page">
+  <div class="card">
 
-  <input id="nome" placeholder="Nome completo">
-  <input id="cpf" placeholder="CPF" maxlength="14">
-  <input id="telefone" placeholder="Telefone com DDD">
+    <div class="logo">
+      <h1>PASSAGEIRO</h1>
+      <span>Acesso com CPF cadastrado</span>
+    </div>
 
-  <button id="btnCadastrar">Finalizar cadastro</button>
+    <input
+      id="cpf"
+      placeholder="Digite seu CPF"
+      maxlength="14"
+      autocomplete="off"
+    >
 
-  <div class="info">
-    Cadastro único.<br>
-    Depois, acesse apenas com seu CPF.
+    <button id="btnEntrar">Entrar</button>
+
+    <div class="error" id="erro">
+      Passageiro não encontrado ou bloqueado
+    </div>
+
   </div>
 </div>
 
-<!-- SUPABASE PADRÃO DO APP -->
+<!-- SUPABASE GLOBAL -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-const nomeInput = document.getElementById("nome");
+/* Auto redirect */
+const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
+if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
+  window.location.href = "dashboard-passageiro.html";
+}
+
 const cpfInput = document.getElementById("cpf");
-const telInput = document.getElementById("telefone");
-const btn = document.getElementById("btnCadastrar");
+const erro = document.getElementById("erro");
 
 /* Máscara CPF */
 cpfInput.addEventListener("input", ()=>{
@@ -94,55 +118,34 @@ cpfInput.addEventListener("input", ()=>{
   cpfInput.value = v;
 });
 
-/* Máscara telefone */
-telInput.addEventListener("input", ()=>{
-  telInput.value = telInput.value.replace(/\D/g,"").slice(0,11);
-});
+/* Login */
+document.getElementById("btnEntrar").onclick = async ()=>{
+  erro.style.display = "none";
 
-btn.onclick = async ()=>{
-  const nome = nomeInput.value.trim();
   const cpf = cpfInput.value.replace(/\D/g,"");
-  const telefone = telInput.value.replace(/\D/g,"");
 
-  if(!nome || cpf.length!==11 || telefone.length<10){
-    alert("Preencha nome, CPF e telefone corretamente");
+  if(cpf.length !== 11){
+    erro.innerText = "CPF inválido";
+    erro.style.display = "block";
     return;
   }
 
-  /* Verifica CPF */
-  const { data: existente } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("usuarios")
-    .select("id")
+    .select("*")
     .eq("cpf", cpf)
-    .eq("tipo","passageiro")
+    .eq("tipo", "passageiro")
+    .eq("ativo", true)
     .eq("grupo_id", GRUPO_ID)
-    .maybeSingle();
+    .single();
 
-  if(existente){
-    alert("CPF já cadastrado. Use o login.");
-    window.location.href="login-passageiro.html";
+  if(error || !data){
+    erro.style.display = "block";
     return;
   }
 
-  const novo = {
-    tipo:"passageiro",
-    nome,
-    cpf,
-    telefone,
-    ativo:true,
-    grupo_id:GRUPO_ID
-  };
-
-  const { error } = await supabaseClient.from("usuarios").insert(novo);
-
-  if(error){
-    alert("Erro ao salvar cadastro");
-    console.error(error);
-    return;
-  }
-
-  localStorage.setItem("usuarioRF", JSON.stringify(novo));
-  window.location.href="dashboard-passageiro.html";
+  localStorage.setItem("usuarioRF", JSON.stringify(data));
+  window.location.href = "dashboard-passageiro.html";
 };
 </script>
 
