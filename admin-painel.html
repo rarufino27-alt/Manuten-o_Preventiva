@@ -48,6 +48,9 @@ h1{
   margin-top:4px;
   display:inline-block;
 }
+.badge.ativo{ background:#d4f5dd; color:#0a7a2f; }
+.badge.bloqueado{ background:#ffd6d6; color:#a40000; }
+
 .btn{
   padding:10px 14px;
   border-radius:12px;
@@ -88,6 +91,7 @@ h1{
   </div>
 </div>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
@@ -95,19 +99,23 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
 );
 
+// GRUPO BASE RF DRIVER
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
-const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
+// PROTEÇÃO
+const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 if(!usuario || usuario.tipo !== "admin"){
   localStorage.clear();
   window.location.href = "index.html";
 }
 
+// CARREGAR USUÁRIOS
 async function carregar(){
   const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .order("created_at",{ascending:false});
+    .eq("grupo_id", GRUPO_ID)
+    .order("created_at",{ ascending:false });
 
   if(error){
     alert("Erro ao carregar usuários");
@@ -118,33 +126,43 @@ async function carregar(){
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  data
-    .filter(u => u.grupo_id === GRUPO_ID)
-    .forEach(u=>{
-      const div = document.createElement("div");
-      div.className = "user";
+  if(!data || data.length === 0){
+    lista.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    return;
+  }
 
-      div.innerHTML = `
-        <div class="info">
-          <strong>${u.nome}</strong><br>
-          ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
-          <div class="badge">${u.ativo ? "ATIVO" : "BLOQUEADO"}</div>
+  data.forEach(u=>{
+    const div = document.createElement("div");
+    div.className = "user";
+
+    const statusClass = u.ativo ? "ativo" : "bloqueado";
+
+    div.innerHTML = `
+      <div class="info">
+        <strong>${u.nome || "Sem nome"}</strong><br>
+        ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
+        <div class="badge ${statusClass}">
+          ${u.ativo ? "ATIVO" : "BLOQUEADO"}
         </div>
-        <button class="btn ${u.ativo ? "block" : "unblock"}"
-          onclick="toggle('${u.id}',${u.ativo})">
-          ${u.ativo ? "Bloquear" : "Ativar"}
-        </button>
-      `;
+      </div>
 
-      lista.appendChild(div);
-    });
+      <button class="btn ${u.ativo ? "block" : "unblock"}"
+        onclick="toggle('${u.id}', ${u.ativo})">
+        ${u.ativo ? "Bloquear" : "Ativar"}
+      </button>
+    `;
+
+    lista.appendChild(div);
+  });
 }
 
-async function toggle(id,ativo){
+// ATIVAR / BLOQUEAR
+async function toggle(id, ativo){
   const { error } = await supabaseClient
     .from("usuarios")
-    .update({ativo: !ativo})
-    .eq("id",id);
+    .update({ ativo: !ativo })
+    .eq("id", id)
+    .eq("grupo_id", GRUPO_ID);
 
   if(error){
     alert("Erro ao alterar status");
@@ -155,6 +173,7 @@ async function toggle(id,ativo){
   carregar();
 }
 
+// VOLTAR
 function voltar(){
   window.location.href = "dashboard-admin.html";
 }
