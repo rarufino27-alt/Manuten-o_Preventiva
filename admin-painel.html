@@ -9,86 +9,63 @@
 
 <style>
 body{
-  background:linear-gradient(180deg,#ffffff,#f3f3f3);
+  background:#f4f4f4;
   font-family:Inter, Arial, sans-serif;
 }
-
 .page{
   min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:22px;
+  padding:20px;
 }
-
-.container{
-  width:100%;
-  max-width:520px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-.header{
+.box{
+  max-width:680px;
+  margin:auto;
   background:#fff;
-  padding:26px;
   border-radius:26px;
-  box-shadow:0 10px 28px rgba(0,0,0,.12);
+  padding:26px;
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
+}
+h1{
   text-align:center;
+  margin-bottom:20px;
 }
-
-.header h1{
-  font-size:1.6rem;
-  font-weight:900;
-  color:#000;
+.user{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #ddd;
+  margin-bottom:10px;
 }
-
-.header span{
+.info{
   font-size:.85rem;
-  color:#666;
 }
-
-.card{
-  background:#fff;
-  padding:18px;
-  border-radius:22px;
-  box-shadow:0 8px 22px rgba(0,0,0,.08);
+.badge{
+  font-size:.7rem;
+  padding:4px 8px;
+  border-radius:10px;
+  background:#eee;
 }
-
-.card strong{
-  display:block;
-  margin-bottom:6px;
-}
-
 .btn{
-  width:100%;
-  padding:16px;
-  border-radius:18px;
+  padding:10px 14px;
+  border-radius:12px;
   border:none;
-  font-size:1rem;
-  font-weight:800;
+  font-weight:700;
   cursor:pointer;
 }
-
-.btn-dark{
-  background:#111;
+.block{
+  background:#ff3b30;
   color:#fff;
 }
-
-.btn-gold{
-  background:linear-gradient(180deg,#E6C97A,#D4AF37);
-  color:#000;
+.unblock{
+  background:#1DB954;
+  color:#fff;
 }
-
-.btn-outline{
-  background:#fff;
-  border:1px solid #ccc;
-}
-
-.footer{
-  text-align:center;
-  font-size:.75rem;
-  color:#777;
-  margin-top:10px;
+.back{
+  margin-top:20px;
+  width:100%;
+  background:#111;
+  color:#fff;
 }
 </style>
 </head>
@@ -96,44 +73,27 @@ body{
 <body>
 
 <div class="page">
-  <div class="container">
+  <div class="box">
 
-    <!-- HEADER -->
-    <div class="header">
-      <h1>Painel Administrativo</h1>
-      <span id="nomeAdmin"></span>
-    </div>
+    <h1>Painel Administrativo</h1>
 
-    <!-- STATUS -->
-    <div class="card">
-      <strong>Status do sistema</strong>
-      Acesso total liberado para este grupo.<br>
-      Você pode gerenciar usuários, rotas e operações.
-    </div>
+    <div id="lista"></div>
 
-    <!-- AÇÕES -->
-    <button class="btn btn-gold" onclick="voltarDashboard()">
+    <button class="btn back" onclick="voltar()">
       ⬅ Voltar ao Dashboard
     </button>
-
-    <button class="btn btn-dark" onclick="iniciarCalculo()">
-      ▶ Iniciar cálculo de corrida
-    </button>
-
-    <button class="btn btn-outline" onclick="sair()">
-      🔒 Encerrar sessão
-    </button>
-
-    <div class="footer">
-      RF Driver • Administração do sistema
-    </div>
 
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ================= PROTEÇÃO ================= */
+const supabaseClient = supabase.createClient(
+  "https://msnqiiwcityikslikbow.supabase.co",
+  "SUA_ANON_KEY_AQUI"
+);
 
+const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
 if(!usuario || usuario.tipo !== "admin"){
@@ -141,28 +101,55 @@ if(!usuario || usuario.tipo !== "admin"){
   window.location.href = "index.html";
 }
 
-/* ================= UI ================= */
+async function carregar(){
+  const { data, error } = await supabaseClient
+    .from("usuarios")
+    .select("*")
+    .eq("grupo_id", GRUPO_ID)
+    .order("created_at",{ascending:false});
 
-document.getElementById("nomeAdmin").innerText =
-  `Administrador: ${usuario.nome}`;
+  if(error){
+    alert("Erro ao carregar usuários");
+    return;
+  }
 
-/* ================= AÇÕES ================= */
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
 
-function voltarDashboard(){
+  data.forEach(u=>{
+    const div = document.createElement("div");
+    div.className = "user";
+
+    div.innerHTML = `
+      <div class="info">
+        <strong>${u.nome}</strong><br>
+        ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
+        <div class="badge">${u.ativo ? "ATIVO" : "BLOQUEADO"}</div>
+      </div>
+      <button class="btn ${u.ativo ? "block" : "unblock"}"
+        onclick="toggle('${u.id}',${u.ativo})">
+        ${u.ativo ? "Bloquear" : "Ativar"}
+      </button>
+    `;
+
+    lista.appendChild(div);
+  });
+}
+
+async function toggle(id,ativo){
+  await supabaseClient
+    .from("usuarios")
+    .update({ativo: !ativo})
+    .eq("id",id);
+
+  carregar();
+}
+
+function voltar(){
   window.location.href = "dashboard-admin.html";
 }
 
-function iniciarCalculo(){
-  localStorage.removeItem("origem");
-  localStorage.removeItem("destino");
-  localStorage.removeItem("valorBase");
-  window.location.href = "origem.html";
-}
-
-function sair(){
-  localStorage.clear();
-  window.location.href = "index.html";
-}
+carregar();
 </script>
 
 </body>
