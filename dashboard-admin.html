@@ -12,37 +12,60 @@ body{
   background:linear-gradient(180deg,#ffffff,#f3f3f3);
   font-family:Inter, Arial, sans-serif;
 }
+
 .page{
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  padding:20px;
 }
+
 .box{
   background:#fff;
-  padding:30px;
+  padding:30px 26px;
   border-radius:26px;
   box-shadow:0 14px 36px rgba(0,0,0,.12);
   max-width:420px;
   width:100%;
   text-align:center;
 }
+
 h1{
+  font-size:1.6rem;
+  font-weight:900;
   color:#000;
+  margin-bottom:6px;
 }
+
+p{
+  font-size:.9rem;
+  color:#555;
+  margin-bottom:22px;
+}
+
 button{
-  margin-top:14px;
-  padding:16px;
   width:100%;
+  padding:16px;
   border-radius:18px;
   border:none;
   font-weight:800;
+  font-size:1rem;
+  cursor:pointer;
+  margin-bottom:12px;
 }
-.admin{
+
+.btn-primary{
   background:#111;
   color:#fff;
 }
-.out{
+
+.btn-gold{
+  background:linear-gradient(180deg,#E6C97A,#D4AF37);
+  color:#000;
+}
+
+.btn-outline{
   background:#fff;
   border:1px solid #ccc;
 }
@@ -55,13 +78,17 @@ button{
   <div class="box">
 
     <h1>ADMINISTRADOR</h1>
-    <p id="nome"></p>
+    <p id="nomeAdmin"></p>
 
-    <button class="admin" onclick="abrirPainel()">
-      🛠️ Painel Administrativo
+    <button class="btn-gold" onclick="iniciarCalculo()">
+      ▶ Iniciar cálculo de corrida
     </button>
 
-    <button class="out" onclick="sair()">
+    <button class="btn-primary" onclick="abrirPainel()">
+      🛠️ Acessar Painel Administrativo
+    </button>
+
+    <button class="btn-outline" onclick="sair()">
       🔒 Sair
     </button>
 
@@ -69,6 +96,8 @@ button{
 </div>
 
 <script>
+/* ================= PROTEÇÃO ================= */
+
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
 if(!usuario || usuario.tipo !== "admin"){
@@ -76,7 +105,19 @@ if(!usuario || usuario.tipo !== "admin"){
   window.location.href = "index.html";
 }
 
-document.getElementById("nome").innerText = usuario.nome;
+/* ================= UI ================= */
+
+document.getElementById("nomeAdmin").innerText =
+  `Olá, ${usuario.nome}`;
+
+/* ================= AÇÕES ================= */
+
+function iniciarCalculo(){
+  localStorage.removeItem("origem");
+  localStorage.removeItem("destino");
+  localStorage.removeItem("valorBase");
+  window.location.href = "origem.html";
+}
 
 function abrirPainel(){
   window.location.href = "admin-painel.html";
