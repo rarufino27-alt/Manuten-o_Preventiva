@@ -1,4 +1,4 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ================= SUPABASE CONFIG GLOBAL ================= */
 
@@ -30,4 +30,3 @@ function montarUsuarioBase(dados){
     ativo: true
   };
 }
-</script>
