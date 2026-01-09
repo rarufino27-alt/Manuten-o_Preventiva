@@ -11,7 +11,9 @@
 body{
   background:radial-gradient(circle at top,#ffffff,#f2f2f2);
   font-family:Inter, Arial, sans-serif;
+  color:#222;
 }
+
 .page{
   min-height:100vh;
   display:flex;
@@ -19,6 +21,7 @@ body{
   justify-content:center;
   padding:22px;
 }
+
 .card{
   width:100%;
   max-width:380px;
@@ -30,20 +33,35 @@ body{
   flex-direction:column;
   gap:18px;
 }
-h1{text-align:center}
+
+h1{
+  text-align:center;
+  font-size:1.4rem;
+  letter-spacing:1px;
+}
+
 input{
   width:100%;
   padding:14px;
   border-radius:16px;
   border:1px solid #ccc;
+  font-size:1rem;
 }
+
 button{
   padding:16px;
   border-radius:18px;
   border:none;
   background:#d4af37;
   font-weight:800;
+  font-size:1rem;
+  cursor:pointer;
 }
+
+button:active{
+  transform:scale(.98);
+}
+
 .error{
   color:#c62828;
   font-size:.8rem;
@@ -58,29 +76,72 @@ button{
 <div class="page">
   <div class="card">
 
-    <h1>ADMIN</h1>
+    <h1>ADMINISTRADOR</h1>
 
-    <input id="cpf" placeholder="CPF do administrador">
+    <input
+      id="cpf"
+      placeholder="CPF do administrador"
+      maxlength="14"
+      autocomplete="off"
+    >
+
     <button id="btnEntrar">Entrar</button>
 
-    <div class="error" id="erro">Admin não autorizado</div>
+    <div class="error" id="erro">
+      Administrador não autorizado
+    </div>
 
   </div>
 </div>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ================= CONFIGURAÇÃO FIXA ================= */
+
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "SUA_ANON_KEY_AQUI"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
 );
 
+// 🔴 GRUPO BASE (RF DRIVER)
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+</script>
 
-document.getElementById("btnEntrar").onclick = async () => {
-  const cpf = document.getElementById("cpf").value.replace(/\D/g,"");
-  const erro = document.getElementById("erro");
+<script>
+/* ================= ELEMENTOS ================= */
+
+const cpfInput = document.getElementById("cpf");
+const btn = document.getElementById("btnEntrar");
+const erro = document.getElementById("erro");
+
+/* ================= MÁSCARA CPF ================= */
+
+cpfInput.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value = v;
+});
+
+/* ================= LOGIN ADMIN ================= */
+
+btn.addEventListener("click", loginAdmin);
+cpfInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") loginAdmin();
+});
+
+async function loginAdmin(){
   erro.style.display = "none";
+
+  const cpf = cpfInput.value.replace(/\D/g,"");
+
+  if(cpf.length !== 11){
+    erro.innerText = "CPF inválido";
+    erro.style.display = "block";
+    return;
+  }
 
   const { data, error } = await supabaseClient
     .from("usuarios")
@@ -96,9 +157,16 @@ document.getElementById("btnEntrar").onclick = async () => {
     return;
   }
 
-  localStorage.setItem("usuarioRF", JSON.stringify(data));
+  localStorage.setItem("usuarioRF", JSON.stringify({
+    id: data.id,
+    tipo: data.tipo,
+    nome: data.nome,
+    cpf: data.cpf,
+    grupo_id: data.grupo_id
+  }));
+
   window.location.href = "dashboard-admin.html";
-};
+}
 </script>
 
 </body>
