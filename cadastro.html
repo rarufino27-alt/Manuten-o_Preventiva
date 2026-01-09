@@ -12,8 +12,8 @@ body{
   background:#f4f4f4;
   font-family:Inter, Arial, sans-serif;
   padding:16px;
+  color:#000;
 }
-
 .card{
   background:#fff;
   padding:22px;
@@ -22,13 +22,10 @@ body{
   max-width:420px;
   margin:auto;
 }
-
 h1{
   text-align:center;
   margin-bottom:18px;
-  color:#000;
 }
-
 input{
   width:100%;
   padding:13px;
@@ -36,8 +33,8 @@ input{
   border:1px solid #ccc;
   margin-bottom:14px;
   font-size:.95rem;
+  color:#000;
 }
-
 button{
   width:100%;
   padding:15px;
@@ -49,11 +46,7 @@ button{
   font-size:1rem;
   cursor:pointer;
 }
-
-button:active{
-  transform:scale(.98);
-}
-
+button:active{transform:scale(.98)}
 .info{
   font-size:.75rem;
   color:#555;
@@ -68,119 +61,89 @@ button:active{
 <div class="card">
   <h1>Cadastro de Passageiro</h1>
 
-  <input
-    type="text"
-    id="nome"
-    placeholder="Nome completo"
-    autocomplete="name"
-  >
+  <input id="nome" placeholder="Nome completo">
+  <input id="cpf" placeholder="CPF" maxlength="14">
+  <input id="telefone" placeholder="Telefone com DDD">
 
-  <input
-    type="tel"
-    id="telefone"
-    placeholder="Telefone com DDD"
-    autocomplete="tel"
-  >
-
-  <button id="btnCadastrar">
-    Finalizar cadastro
-  </button>
+  <button id="btnCadastrar">Finalizar cadastro</button>
 
   <div class="info">
-    Este cadastro é feito apenas uma vez.<br>
-    Em novos acessos, utilize o login com telefone.
+    Cadastro único.<br>
+    Depois, acesse apenas com seu CPF.
   </div>
 </div>
 
-<!-- SUPABASE (PADRÃO ÚNICO DO PROJETO) -->
+<!-- SUPABASE PADRÃO DO APP -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
-/* ================= CONFIG FIXA ================= */
-
-// GRUPO RF DRIVER (BASE)
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-/* ================= ELEMENTOS ================= */
-
 const nomeInput = document.getElementById("nome");
-const telefoneInput = document.getElementById("telefone");
+const cpfInput = document.getElementById("cpf");
+const telInput = document.getElementById("telefone");
 const btn = document.getElementById("btnCadastrar");
 
-/* ================= MÁSCARA TELEFONE ================= */
-
-telefoneInput.addEventListener("input", () => {
-  let v = telefoneInput.value.replace(/\D/g,"").slice(0,11);
-
-  if(v.length >= 11){
-    v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-  } else if(v.length >= 7){
-    v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
-  } else if(v.length >= 3){
-    v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
-  }
-
-  telefoneInput.value = v;
+/* Máscara CPF */
+cpfInput.addEventListener("input", ()=>{
+  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value = v;
 });
 
-/* ================= CADASTRO ================= */
+/* Máscara telefone */
+telInput.addEventListener("input", ()=>{
+  telInput.value = telInput.value.replace(/\D/g,"").slice(0,11);
+});
 
-btn.addEventListener("click", cadastrar);
-
-async function cadastrar(){
+btn.onclick = async ()=>{
   const nome = nomeInput.value.trim();
-  const telefone = telefoneInput.value.replace(/\D/g,"");
+  const cpf = cpfInput.value.replace(/\D/g,"");
+  const telefone = telInput.value.replace(/\D/g,"");
 
-  if(!nome || telefone.length < 10){
-    alert("Preencha corretamente nome e telefone");
+  if(!nome || cpf.length!==11 || telefone.length<10){
+    alert("Preencha nome, CPF e telefone corretamente");
     return;
   }
 
-  /* 🔍 VERIFICA SE JÁ EXISTE */
-  const { data: existente, error: erroBusca } = await supabaseClient
+  /* Verifica CPF */
+  const { data: existente } = await supabaseClient
     .from("usuarios")
     .select("id")
-    .eq("telefone", telefone)
-    .eq("tipo", "passageiro")
+    .eq("cpf", cpf)
+    .eq("tipo","passageiro")
     .eq("grupo_id", GRUPO_ID)
     .maybeSingle();
 
-  if(erroBusca){
-    console.error("Erro busca:", erroBusca);
-    alert("Erro ao verificar cadastro");
-    return;
-  }
-
   if(existente){
-    alert("Telefone já cadastrado. Use o login de passageiro.");
-    window.location.href = "login-passageiro.html";
+    alert("CPF já cadastrado. Use o login.");
+    window.location.href="login-passageiro.html";
     return;
   }
 
-  /* ✅ OBJETO FINAL CORRETO */
-  const novoUsuario = {
-    tipo: "passageiro",
-    nome: nome,
-    telefone: telefone,
-    ativo: true,
-    grupo_id: GRUPO_ID
+  const novo = {
+    tipo:"passageiro",
+    nome,
+    cpf,
+    telefone,
+    ativo:true,
+    grupo_id:GRUPO_ID
   };
 
-  const { error: erroInsert } = await supabaseClient
-    .from("usuarios")
-    .insert(novoUsuario);
+  const { error } = await supabaseClient.from("usuarios").insert(novo);
 
-  if(erroInsert){
-    console.error("Erro insert:", erroInsert);
+  if(error){
     alert("Erro ao salvar cadastro");
+    console.error(error);
     return;
   }
 
-  /* LOGIN AUTOMÁTICO */
-  localStorage.setItem("usuarioRF", JSON.stringify(novoUsuario));
-  window.location.href = "dashboard-passageiro.html";
-}
+  localStorage.setItem("usuarioRF", JSON.stringify(novo));
+  window.location.href="dashboard-passageiro.html";
+};
 </script>
 
 </body>
