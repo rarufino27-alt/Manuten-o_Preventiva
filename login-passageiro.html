@@ -11,6 +11,7 @@
 body{
   background:radial-gradient(circle at top,#ffffff,#f2f2f2);
   font-family:Inter, Arial, sans-serif;
+  color:#000;
 }
 
 .page{
@@ -41,12 +42,11 @@ body{
   font-size:1.6rem;
   font-weight:900;
   letter-spacing:2px;
-  color:#000;
 }
 
 .logo span{
   font-size:.8rem;
-  color:#666;
+  color:#555;
 }
 
 input{
@@ -54,6 +54,7 @@ input{
   padding:14px;
   border-radius:16px;
   border:1px solid #ccc;
+  font-size:1rem;
 }
 
 button{
@@ -61,6 +62,7 @@ button{
   border-radius:18px;
   border:none;
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
+  font-size:1rem;
   font-weight:800;
   cursor:pointer;
 }
@@ -70,12 +72,6 @@ button{
   font-size:.8rem;
   text-align:center;
   display:none;
-}
-
-.info{
-  font-size:.75rem;
-  color:#666;
-  text-align:center;
 }
 </style>
 </head>
@@ -91,63 +87,37 @@ button{
     </div>
 
     <input
+      type="tel"
       id="telefone"
-      placeholder="Telefone com DDD"
-      autocomplete="tel"
+      placeholder="Digite seu telefone"
+      autocomplete="off"
     >
 
     <button id="btnEntrar">Entrar</button>
 
     <div class="error" id="erro">
-      Passageiro não encontrado ou acesso bloqueado
-    </div>
-
-    <div class="info">
-      Use o mesmo telefone informado no cadastro.
+      Passageiro não encontrado ou bloqueado
     </div>
 
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL -->
+<!-- SUPABASE GLOBAL (PADRÃO ÚNICO) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
-/* ================= CONFIG ================= */
-
-const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
-
-/* ================= ELEMENTOS ================= */
-
-const telInput = document.getElementById("telefone");
-const btn = document.getElementById("btnEntrar");
+const telefoneInput = document.getElementById("telefone");
 const erro = document.getElementById("erro");
 
-/* ================= MÁSCARA TELEFONE ================= */
-
-telInput.addEventListener("input", () => {
-  let v = telInput.value.replace(/\D/g,"").slice(0,11);
-
-  if(v.length > 10){
-    v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-  }else if(v.length > 6){
-    v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
-  }else if(v.length > 2){
-    v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
-  }
-
-  telInput.value = v;
+telefoneInput.addEventListener("input", () => {
+  telefoneInput.value = telefoneInput.value.replace(/\D/g,"").slice(0,11);
 });
 
-/* ================= LOGIN ================= */
-
-btn.addEventListener("click", loginPassageiro);
-
-async function loginPassageiro(){
+document.getElementById("btnEntrar").onclick = async () => {
   erro.style.display = "none";
 
-  const telefone = telInput.value.replace(/\D/g,"");
+  const telefone = telefoneInput.value;
 
   if(telefone.length < 10){
     erro.innerText = "Telefone inválido";
@@ -161,7 +131,6 @@ async function loginPassageiro(){
     .eq("telefone", telefone)
     .eq("tipo", "passageiro")
     .eq("ativo", true)
-    .eq("grupo_id", GRUPO_ID)
     .single();
 
   if(error || !data){
@@ -171,7 +140,7 @@ async function loginPassageiro(){
 
   localStorage.setItem("usuarioRF", JSON.stringify(data));
   window.location.href = "dashboard-passageiro.html";
-}
+};
 </script>
 
 </body>
