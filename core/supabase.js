@@ -1,25 +1,33 @@
-/* ===============================
-   SUPABASE CENTRAL CONFIG
-   RF DRIVER / MULTI-GRUPOS
-================================ */
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= SUPABASE CONFIG GLOBAL ================= */
 
+// 🔒 SUPABASE FIXO (RF DRIVER)
 const SUPABASE_URL = "https://msnqiiwcityikslikbow.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"; // use a anon pública
+const SUPABASE_ANON_KEY = "SUA_ANON_KEY_AQUI";
 
+// 🧠 GRUPO FIXO (RF Driver)
+const GRUPO_ID_FIXO = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+
+// Cliente Supabase
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-/* ===============================
-   GRUPO ATUAL (PADRÃO)
-   RF DRIVER
-================================ */
+/* ================= HELPERS ================= */
 
-const GRUPO_ATUAL = "rf_driver";
+// Retorna grupo atual (fixo por enquanto)
+function getGrupoId(){
+  return GRUPO_ID_FIXO;
+}
 
-/* ===============================
-   EXPORT GLOBAL
-================================ */
-window.supabaseClient = supabaseClient;
-window.GRUPO_ATUAL = GRUPO_ATUAL;
+// Monta payload padrão de usuário
+function montarUsuarioBase(dados){
+  return {
+    ...dados,
+    grupo_id: getGrupoId(),
+    ativo: true
+  };
+}
+</script>
