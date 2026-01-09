@@ -13,6 +13,7 @@ body{
   font-family:Inter, Arial, sans-serif;
   color:#000;
 }
+
 .page{
   min-height:100vh;
   display:flex;
@@ -20,6 +21,7 @@ body{
   justify-content:center;
   padding:22px;
 }
+
 .card{
   width:100%;
   max-width:380px;
@@ -31,9 +33,23 @@ body{
   flex-direction:column;
   gap:18px;
 }
-.logo{text-align:center}
-.logo h1{font-size:1.6rem;font-weight:900}
-.logo span{font-size:.8rem;color:#444}
+
+.logo{
+  text-align:center;
+}
+
+.logo h1{
+  font-size:1.6rem;
+  font-weight:900;
+  letter-spacing:2px;
+  color:#000;
+}
+
+.logo span{
+  font-size:.85rem;
+  color:#555;
+}
+
 input{
   width:100%;
   padding:14px;
@@ -42,6 +58,7 @@ input{
   font-size:1rem;
   color:#000;
 }
+
 button{
   padding:16px;
   border-radius:18px;
@@ -49,9 +66,10 @@ button{
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
   font-size:1rem;
   font-weight:800;
-  cursor:pointer;
   color:#000;
+  cursor:pointer;
 }
+
 .error{
   color:#c62828;
   font-size:.8rem;
@@ -68,68 +86,81 @@ button{
 
     <div class="logo">
       <h1>PASSAGEIRO</h1>
-      <span>Acesso com CPF</span>
+      <span>Acesso com telefone cadastrado</span>
     </div>
 
-    <input id="cpf" placeholder="Digite seu CPF" maxlength="14">
+    <input
+      type="tel"
+      id="telefone"
+      placeholder="Digite seu telefone com DDD"
+      autocomplete="tel"
+    >
+
     <button id="btnEntrar">Entrar</button>
 
-    <div class="error" id="erro">Passageiro não encontrado ou bloqueado</div>
+    <div class="error" id="erro">
+      Passageiro não encontrado ou bloqueado
+    </div>
 
   </div>
 </div>
 
-<!-- SUPABASE PADRÃO -->
+<!-- SUPABASE GLOBAL ÚNICO -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
-const GRUPO_ID="f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+/* ================= CONFIG FIXA ================= */
 
-const cpfInput=document.getElementById("cpf");
-const erro=document.getElementById("erro");
+const GRUPO_ID = getGrupoId();
 
-/* Auto login */
-const logado=JSON.parse(localStorage.getItem("usuarioRF"));
-if(logado && logado.tipo==="passageiro"){
-  window.location.href="dashboard-passageiro.html";
+/* ================= AUTO-REDIRECT ================= */
+
+const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
+if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
+  window.location.href = "dashboard-passageiro.html";
 }
 
-/* Máscara */
-cpfInput.addEventListener("input",()=>{
-  let v=cpfInput.value.replace(/\D/g,"").slice(0,11);
-  v=v.replace(/(\d{3})(\d)/,"$1.$2");
-  v=v.replace(/(\d{3})(\d)/,"$1.$2");
-  v=v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  cpfInput.value=v;
+/* ================= ELEMENTOS ================= */
+
+const telefoneInput = document.getElementById("telefone");
+const erro = document.getElementById("erro");
+
+/* ================= MÁSCARA TELEFONE ================= */
+
+telefoneInput.addEventListener("input", ()=>{
+  telefoneInput.value = telefoneInput.value.replace(/\D/g,"").slice(0,11);
 });
 
-document.getElementById("btnEntrar").onclick=async()=>{
-  erro.style.display="none";
-  const cpf=cpfInput.value.replace(/\D/g,"");
+/* ================= LOGIN ================= */
 
-  if(cpf.length!==11){
-    erro.innerText="CPF inválido";
-    erro.style.display="block";
+document.getElementById("btnEntrar").onclick = async ()=>{
+  erro.style.display = "none";
+
+  const telefone = telefoneInput.value;
+
+  if(telefone.length < 10){
+    erro.innerText = "Telefone inválido";
+    erro.style.display = "block";
     return;
   }
 
   const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .eq("cpf",cpf)
-    .eq("tipo","passageiro")
-    .eq("ativo",true)
-    .eq("grupo_id",GRUPO_ID)
+    .eq("telefone", telefone)
+    .eq("tipo", "passageiro")
+    .eq("ativo", true)
+    .eq("grupo_id", GRUPO_ID)
     .single();
 
-  if(error||!data){
-    erro.style.display="block";
+  if(error || !data){
+    erro.style.display = "block";
     return;
   }
 
-  localStorage.setItem("usuarioRF",JSON.stringify(data));
-  window.location.href="dashboard-passageiro.html";
+  localStorage.setItem("usuarioRF", JSON.stringify(data));
+  window.location.href = "dashboard-passageiro.html";
 };
 </script>
 
