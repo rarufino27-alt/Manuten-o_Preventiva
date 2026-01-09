@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Login Passageiro – RF Driver</title>
+<title>Cadastro Passageiro – RF Driver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="./theme/theme.css">
@@ -13,6 +13,7 @@ body{
   font-family:Inter, Arial, sans-serif;
   color:#000;
 }
+
 .page{
   min-height:100vh;
   display:flex;
@@ -20,9 +21,10 @@ body{
   justify-content:center;
   padding:22px;
 }
+
 .card{
   width:100%;
-  max-width:380px;
+  max-width:420px;
   background:#fff;
   border-radius:26px;
   padding:28px 22px;
@@ -31,16 +33,22 @@ body{
   flex-direction:column;
   gap:18px;
 }
-.logo{text-align:center}
+
+.logo{
+  text-align:center;
+}
+
 .logo h1{
   font-size:1.6rem;
   font-weight:900;
   letter-spacing:2px;
 }
+
 .logo span{
-  font-size:.8rem;
+  font-size:.85rem;
   color:#555;
 }
+
 input{
   width:100%;
   padding:14px;
@@ -49,6 +57,7 @@ input{
   font-size:1rem;
   color:#000;
 }
+
 button{
   padding:16px;
   border-radius:18px;
@@ -56,13 +65,14 @@ button{
   background:linear-gradient(180deg,#E6C97A,#D4AF37);
   font-size:1rem;
   font-weight:800;
+  color:#000;
   cursor:pointer;
 }
-.error{
-  color:#c62828;
-  font-size:.8rem;
+
+.info{
+  font-size:.75rem;
+  color:#555;
   text-align:center;
-  display:none;
 }
 </style>
 </head>
@@ -74,78 +84,82 @@ button{
 
     <div class="logo">
       <h1>PASSAGEIRO</h1>
-      <span>Acesso com CPF cadastrado</span>
+      <span>Solicitação de cadastro</span>
     </div>
 
     <input
-      id="cpf"
-      placeholder="Digite seu CPF"
-      maxlength="14"
-      autocomplete="off"
+      id="nome"
+      placeholder="Nome e sobrenome"
+      autocomplete="name"
     >
 
-    <button id="btnEntrar">Entrar</button>
+    <input
+      id="telefone"
+      placeholder="Telefone com DDD"
+      autocomplete="tel"
+    >
 
-    <div class="error" id="erro">
-      Passageiro não encontrado ou bloqueado
+    <button id="btnSolicitar">
+      Gerar cadastro
+    </button>
+
+    <div class="info">
+      O cadastro será liberado manualmente.<br>
+      Após liberação, o acesso será feito apenas com o telefone.
     </div>
 
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/supabase.js"></script>
-
 <script>
+/* ================= CONFIG ================= */
+
+// 📲 SEU WHATSAPP
+const WHATSAPP_NUMERO = "5581992716132";
+
+// 🧠 GRUPO RF DRIVER (FIXO)
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-/* Auto redirect */
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
-  window.location.href = "dashboard-passageiro.html";
-}
+/* ================= ELEMENTOS ================= */
 
-const cpfInput = document.getElementById("cpf");
-const erro = document.getElementById("erro");
+const nomeInput = document.getElementById("nome");
+const telefoneInput = document.getElementById("telefone");
 
-/* Máscara CPF */
-cpfInput.addEventListener("input", ()=>{
-  let v = cpfInput.value.replace(/\D/g,"").slice(0,11);
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  cpfInput.value = v;
+/* ================= MÁSCARA TELEFONE ================= */
+
+telefoneInput.addEventListener("input", ()=>{
+  telefoneInput.value = telefoneInput.value.replace(/\D/g,"").slice(0,11);
 });
 
-/* Login */
-document.getElementById("btnEntrar").onclick = async ()=>{
-  erro.style.display = "none";
+/* ================= AÇÃO ================= */
 
-  const cpf = cpfInput.value.replace(/\D/g,"");
+document.getElementById("btnSolicitar").onclick = ()=>{
+  const nome = nomeInput.value.trim();
+  const telefone = telefoneInput.value.replace(/\D/g,"");
 
-  if(cpf.length !== 11){
-    erro.innerText = "CPF inválido";
-    erro.style.display = "block";
+  if(!nome || telefone.length < 10){
+    alert("Preencha corretamente nome e telefone");
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from("usuarios")
-    .select("*")
-    .eq("cpf", cpf)
-    .eq("tipo", "passageiro")
-    .eq("ativo", true)
-    .eq("grupo_id", GRUPO_ID)
-    .single();
+  const sql = `
+INSERT INTO usuarios (
+  tipo,
+  nome,
+  telefone,
+  ativo,
+  grupo_id
+) VALUES (
+  'passageiro',
+  '${nome}',
+  '${telefone}',
+  true,
+  '${GRUPO_ID}'
+);
+`.trim();
 
-  if(error || !data){
-    erro.style.display = "block";
-    return;
-  }
-
-  localStorage.setItem("usuarioRF", JSON.stringify(data));
-  window.location.href = "dashboard-passageiro.html";
+  const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(sql)}`;
+  window.open(url, "_blank");
 };
 </script>
 
