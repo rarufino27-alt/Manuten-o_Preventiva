@@ -13,7 +13,6 @@ body{
   font-family:Inter, Arial, sans-serif;
   color:#000;
 }
-
 .page{
   min-height:100vh;
   display:flex;
@@ -21,7 +20,6 @@ body{
   justify-content:center;
   padding:22px;
 }
-
 .card{
   width:100%;
   max-width:380px;
@@ -33,23 +31,9 @@ body{
   flex-direction:column;
   gap:18px;
 }
-
-.logo{
-  text-align:center;
-}
-
-.logo h1{
-  font-size:1.6rem;
-  font-weight:900;
-  letter-spacing:2px;
-  color:#000;
-}
-
-.logo span{
-  font-size:.8rem;
-  color:#555;
-}
-
+.logo{text-align:center}
+.logo h1{font-size:1.6rem;font-weight:900}
+.logo span{font-size:.8rem;color:#444}
 input{
   width:100%;
   padding:14px;
@@ -58,7 +42,6 @@ input{
   font-size:1rem;
   color:#000;
 }
-
 button{
   padding:16px;
   border-radius:18px;
@@ -69,7 +52,6 @@ button{
   cursor:pointer;
   color:#000;
 }
-
 .error{
   color:#c62828;
   font-size:.8rem;
@@ -86,279 +68,69 @@ button{
 
     <div class="logo">
       <h1>PASSAGEIRO</h1>
-      <span>Acesso com telefone cadastrado</span>
+      <span>Acesso com CPF</span>
     </div>
 
-    <input
-      type="tel"
-      id="telefone"
-      placeholder="Digite seu telefone com DDD"
-      autocomplete="tel"
-    >
-
+    <input id="cpf" placeholder="Digite seu CPF" maxlength="14">
     <button id="btnEntrar">Entrar</button>
 
-    <div class="error" id="erro">
-      Passageiro não encontrado ou acesso bloqueado
-    </div>
+    <div class="error" id="erro">Passageiro não encontrado ou bloqueado</div>
 
   </div>
 </div>
 
-<!-- SUPABASE (PADRÃO ÚNICO DO APP) -->
+<!-- SUPABASE PADRÃO -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
-/* ================= CONFIG FIXA ================= */
+const GRUPO_ID="f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
-const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+const cpfInput=document.getElementById("cpf");
+const erro=document.getElementById("erro");
 
-/* ================= PROTEÇÃO ================= */
-
-// Se já estiver logado corretamente, entra direto
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
-  window.location.href = "dashboard-passageiro.html";
+/* Auto login */
+const logado=JSON.parse(localStorage.getItem("usuarioRF"));
+if(logado && logado.tipo==="passageiro"){
+  window.location.href="dashboard-passageiro.html";
 }
 
-/* ================= ELEMENTOS ================= */
-
-const telefoneInput = document.getElementById("telefone");
-const erro = document.getElementById("erro");
-const btn = document.getElementById("btnEntrar");
-
-/* ================= MÁSCARA TELEFONE ================= */
-
-telefoneInput.addEventListener("input", () => {
-  let v = telefoneInput.value.replace(/\D/g,"").slice(0,11);
-
-  if(v.length >= 11){
-    v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-  } else if(v.length >= 7){
-    v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
-  } else if(v.length >= 3){
-    v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
-  }
-
-  telefoneInput.value = v;
+/* Máscara */
+cpfInput.addEventListener("input",()=>{
+  let v=cpfInput.value.replace(/\D/g,"").slice(0,11);
+  v=v.replace(/(\d{3})(\d)/,"$1.$2");
+  v=v.replace(/(\d{3})(\d)/,"$1.$2");
+  v=v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  cpfInput.value=v;
 });
 
-/* ================= LOGIN ================= */
+document.getElementById("btnEntrar").onclick=async()=>{
+  erro.style.display="none";
+  const cpf=cpfInput.value.replace(/\D/g,"");
 
-btn.addEventListener("click", login);
-
-async function login(){
-  erro.style.display = "none";
-
-  const telefone = telefoneInput.value.replace(/\D/g,"");
-
-  if(telefone.length < 10){
-    erro.innerText = "Telefone inválido";
-    erro.style.display = "block";
+  if(cpf.length!==11){
+    erro.innerText="CPF inválido";
+    erro.style.display="block";
     return;
   }
 
   const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .eq("telefone", telefone)
-    .eq("tipo", "passageiro")
-    .eq("ativo", true)
-    .eq("grupo_id", GRUPO_ID)
+    .eq("cpf",cpf)
+    .eq("tipo","passageiro")
+    .eq("ativo",true)
+    .eq("grupo_id",GRUPO_ID)
     .single();
 
-  if(error || !data){
-    erro.style.display = "block";
+  if(error||!data){
+    erro.style.display="block";
     return;
   }
 
-  /* LOGIN OK */
-  localStorage.setItem("usuarioRF", JSON.stringify(data));
-  window.location.href = "dashboard-passageiro.html";
-}
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Login Passageiro – RF Driver</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="./theme/theme.css">
-
-<style>
-body{
-  background:radial-gradient(circle at top,#ffffff,#f2f2f2);
-  font-family:Inter, Arial, sans-serif;
-  color:#000;
-}
-
-.page{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-}
-
-.card{
-  width:100%;
-  max-width:380px;
-  background:#fff;
-  border-radius:26px;
-  padding:28px 22px;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-.logo{
-  text-align:center;
-}
-
-.logo h1{
-  font-size:1.6rem;
-  font-weight:900;
-  letter-spacing:2px;
-  color:#000;
-}
-
-.logo span{
-  font-size:.8rem;
-  color:#555;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:1px solid #ccc;
-  font-size:1rem;
-  color:#000;
-}
-
-button{
-  padding:16px;
-  border-radius:18px;
-  border:none;
-  background:linear-gradient(180deg,#E6C97A,#D4AF37);
-  font-size:1rem;
-  font-weight:800;
-  cursor:pointer;
-  color:#000;
-}
-
-.error{
-  color:#c62828;
-  font-size:.8rem;
-  text-align:center;
-  display:none;
-}
-</style>
-</head>
-
-<body>
-
-<div class="page">
-  <div class="card">
-
-    <div class="logo">
-      <h1>PASSAGEIRO</h1>
-      <span>Acesso com telefone cadastrado</span>
-    </div>
-
-    <input
-      type="tel"
-      id="telefone"
-      placeholder="Digite seu telefone com DDD"
-      autocomplete="tel"
-    >
-
-    <button id="btnEntrar">Entrar</button>
-
-    <div class="error" id="erro">
-      Passageiro não encontrado ou acesso bloqueado
-    </div>
-
-  </div>
-</div>
-
-<!-- SUPABASE (PADRÃO ÚNICO DO APP) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/supabase.js"></script>
-
-<script>
-/* ================= CONFIG FIXA ================= */
-
-const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
-
-/* ================= PROTEÇÃO ================= */
-
-// Se já estiver logado corretamente, entra direto
-const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
-if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
-  window.location.href = "dashboard-passageiro.html";
-}
-
-/* ================= ELEMENTOS ================= */
-
-const telefoneInput = document.getElementById("telefone");
-const erro = document.getElementById("erro");
-const btn = document.getElementById("btnEntrar");
-
-/* ================= MÁSCARA TELEFONE ================= */
-
-telefoneInput.addEventListener("input", () => {
-  let v = telefoneInput.value.replace(/\D/g,"").slice(0,11);
-
-  if(v.length >= 11){
-    v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-  } else if(v.length >= 7){
-    v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
-  } else if(v.length >= 3){
-    v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
-  }
-
-  telefoneInput.value = v;
-});
-
-/* ================= LOGIN ================= */
-
-btn.addEventListener("click", login);
-
-async function login(){
-  erro.style.display = "none";
-
-  const telefone = telefoneInput.value.replace(/\D/g,"");
-
-  if(telefone.length < 10){
-    erro.innerText = "Telefone inválido";
-    erro.style.display = "block";
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("usuarios")
-    .select("*")
-    .eq("telefone", telefone)
-    .eq("tipo", "passageiro")
-    .eq("ativo", true)
-    .eq("grupo_id", GRUPO_ID)
-    .single();
-
-  if(error || !data){
-    erro.style.display = "block";
-    return;
-  }
-
-  /* LOGIN OK */
-  localStorage.setItem("usuarioRF", JSON.stringify(data));
-  window.location.href = "dashboard-passageiro.html";
-}
+  localStorage.setItem("usuarioRF",JSON.stringify(data));
+  window.location.href="dashboard-passageiro.html";
+};
 </script>
 
 </body>
