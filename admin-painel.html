@@ -11,11 +11,14 @@
 body{
   background:#f4f4f4;
   font-family:Inter, Arial, sans-serif;
+  color:#000;
 }
+
 .page{
   min-height:100vh;
   padding:20px;
 }
+
 .box{
   max-width:720px;
   margin:auto;
@@ -24,10 +27,13 @@ body{
   padding:26px;
   box-shadow:0 14px 36px rgba(0,0,0,.12);
 }
+
 h1{
   text-align:center;
   margin-bottom:20px;
+  color:#000;
 }
+
 .user{
   display:flex;
   justify-content:space-between;
@@ -37,9 +43,16 @@ h1{
   border:1px solid #ddd;
   margin-bottom:10px;
 }
+
 .info{
   font-size:.85rem;
+  color:#000;
 }
+
+.info strong{
+  color:#000;
+}
+
 .badge{
   font-size:.7rem;
   padding:4px 8px;
@@ -47,9 +60,9 @@ h1{
   background:#eee;
   margin-top:4px;
   display:inline-block;
+  color:#000;
+  font-weight:700;
 }
-.badge.ativo{ background:#d4f5dd; color:#0a7a2f; }
-.badge.bloqueado{ background:#ffd6d6; color:#a40000; }
 
 .btn{
   padding:10px 14px;
@@ -58,14 +71,17 @@ h1{
   font-weight:700;
   cursor:pointer;
 }
+
 .block{
   background:#ff3b30;
   color:#fff;
 }
+
 .unblock{
   background:#1DB954;
   color:#fff;
 }
+
 .back{
   margin-top:20px;
   width:100%;
@@ -91,25 +107,21 @@ h1{
   </div>
 </div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
   "https://msnqiiwcityikslikbow.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbnFpaXdjaXR5aWtzbGlrYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDM5OTgsImV4cCI6MjA4MzI3OTk5OH0.0KyaSuL5At4_Cfa4TOM7kvvkVYv-gmR2sb7vX6VHkaU"
+  "SUA_ANON_KEY_AQUI"
 );
 
-// GRUPO BASE RF DRIVER
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
-
-// PROTEÇÃO
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
+
 if(!usuario || usuario.tipo !== "admin"){
   localStorage.clear();
   window.location.href = "index.html";
 }
 
-// CARREGAR USUÁRIOS
 async function carregar(){
   const { data, error } = await supabaseClient
     .from("usuarios")
@@ -127,7 +139,7 @@ async function carregar(){
   lista.innerHTML = "";
 
   if(!data || data.length === 0){
-    lista.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    lista.innerHTML = "<p style='color:#000'>Nenhum usuário encontrado.</p>";
     return;
   }
 
@@ -135,13 +147,11 @@ async function carregar(){
     const div = document.createElement("div");
     div.className = "user";
 
-    const statusClass = u.ativo ? "ativo" : "bloqueado";
-
     div.innerHTML = `
       <div class="info">
         <strong>${u.nome || "Sem nome"}</strong><br>
         ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
-        <div class="badge ${statusClass}">
+        <div class="badge">
           ${u.ativo ? "ATIVO" : "BLOQUEADO"}
         </div>
       </div>
@@ -156,13 +166,11 @@ async function carregar(){
   });
 }
 
-// ATIVAR / BLOQUEAR
 async function toggle(id, ativo){
   const { error } = await supabaseClient
     .from("usuarios")
     .update({ ativo: !ativo })
-    .eq("id", id)
-    .eq("grupo_id", GRUPO_ID);
+    .eq("id", id);
 
   if(error){
     alert("Erro ao alterar status");
@@ -173,7 +181,6 @@ async function toggle(id, ativo){
   carregar();
 }
 
-// VOLTAR
 function voltar(){
   window.location.href = "dashboard-admin.html";
 }
