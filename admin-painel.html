@@ -17,7 +17,7 @@ body{
   padding:20px;
 }
 .box{
-  max-width:680px;
+  max-width:720px;
   margin:auto;
   background:#fff;
   border-radius:26px;
@@ -45,6 +45,8 @@ h1{
   padding:4px 8px;
   border-radius:10px;
   background:#eee;
+  margin-top:4px;
+  display:inline-block;
 }
 .btn{
   padding:10px 14px;
@@ -105,42 +107,50 @@ async function carregar(){
   const { data, error } = await supabaseClient
     .from("usuarios")
     .select("*")
-    .eq("grupo_id", GRUPO_ID)
     .order("created_at",{ascending:false});
 
   if(error){
     alert("Erro ao carregar usuários");
+    console.error(error);
     return;
   }
 
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  data.forEach(u=>{
-    const div = document.createElement("div");
-    div.className = "user";
+  data
+    .filter(u => u.grupo_id === GRUPO_ID)
+    .forEach(u=>{
+      const div = document.createElement("div");
+      div.className = "user";
 
-    div.innerHTML = `
-      <div class="info">
-        <strong>${u.nome}</strong><br>
-        ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
-        <div class="badge">${u.ativo ? "ATIVO" : "BLOQUEADO"}</div>
-      </div>
-      <button class="btn ${u.ativo ? "block" : "unblock"}"
-        onclick="toggle('${u.id}',${u.ativo})">
-        ${u.ativo ? "Bloquear" : "Ativar"}
-      </button>
-    `;
+      div.innerHTML = `
+        <div class="info">
+          <strong>${u.nome}</strong><br>
+          ${u.tipo.toUpperCase()} • ${u.telefone || u.cpf || "-"}
+          <div class="badge">${u.ativo ? "ATIVO" : "BLOQUEADO"}</div>
+        </div>
+        <button class="btn ${u.ativo ? "block" : "unblock"}"
+          onclick="toggle('${u.id}',${u.ativo})">
+          ${u.ativo ? "Bloquear" : "Ativar"}
+        </button>
+      `;
 
-    lista.appendChild(div);
-  });
+      lista.appendChild(div);
+    });
 }
 
 async function toggle(id,ativo){
-  await supabaseClient
+  const { error } = await supabaseClient
     .from("usuarios")
     .update({ativo: !ativo})
     .eq("id",id);
+
+  if(error){
+    alert("Erro ao alterar status");
+    console.error(error);
+    return;
+  }
 
   carregar();
 }
