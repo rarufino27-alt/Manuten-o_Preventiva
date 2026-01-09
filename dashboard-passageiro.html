@@ -10,7 +10,8 @@
 <style>
 body{
   background:linear-gradient(180deg,#ffffff,#f3f3f3);
-  color:#222;
+  color:#000;
+  font-family:Inter, Arial, sans-serif;
 }
 
 .page{
@@ -41,13 +42,13 @@ body{
 .header h1{
   font-size:1.6rem;
   font-weight:800;
-  color:#d4af37;
+  color:#000;
   letter-spacing:1px;
 }
 
 .header span{
   font-size:.85rem;
-  color:#666;
+  color:#000;
 }
 
 /* CARD */
@@ -61,7 +62,7 @@ body{
 
 .card p{
   font-size:.9rem;
-  color:#555;
+  color:#000;
 }
 
 /* BOTÕES */
@@ -84,7 +85,7 @@ body{
 .footer{
   text-align:center;
   font-size:.75rem;
-  color:#777;
+  color:#000;
 }
 </style>
 </head>
@@ -94,13 +95,11 @@ body{
 <div class="page">
   <div class="box">
 
-    <!-- HEADER -->
     <div class="header">
       <h1>PASSAGEIRO</h1>
       <span>Consulta de valor da corrida</span>
     </div>
 
-    <!-- CONTEÚDO -->
     <div class="card">
       <p>
         Consulte o valor estimado da sua viagem de forma
@@ -108,12 +107,10 @@ body{
       </p>
     </div>
 
-    <!-- AÇÃO PRINCIPAL -->
     <button class="btn-main" id="btnIniciar">
       ▶ Consultar valor da corrida
     </button>
 
-    <!-- AÇÕES SECUNDÁRIAS -->
     <div class="actions">
       <button class="btn btn-outline" onclick="abrirRegras()">
         📋 Regras do passageiro
@@ -123,7 +120,6 @@ body{
       </a>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
       RF Driver • Uso exclusivo para passageiros
     </div>
@@ -132,12 +128,16 @@ body{
 </div>
 
 <script>
-/* ================= PROTEÇÃO DE ACESSO ================= */
+/* ================= PROTEÇÃO DE SESSÃO (PADRÃO FINAL) ================= */
 
 const usuario = JSON.parse(localStorage.getItem("usuarioRF"));
 
-if(!usuario || usuario.tipo !== "passageiro"){
-  alert("Acesso restrito. Faça login como passageiro.");
+if(
+  !usuario ||
+  usuario.tipo !== "passageiro" ||
+  usuario.ativo !== true
+){
+  localStorage.clear();
   window.location.href = "login-passageiro.html";
 }
 
@@ -147,7 +147,6 @@ document.getElementById("btnIniciar").onclick = () => {
   localStorage.removeItem("origem");
   localStorage.removeItem("destino");
   localStorage.removeItem("valorBase");
-
   window.location.href = "origem.html";
 };
 
