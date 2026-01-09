@@ -115,7 +115,7 @@ async function carregar(){
     .from("usuarios")
     .select("*")
     .eq("grupo_id", GRUPO_ID)
-    .order("created_at",{ ascending:false });
+    .order("criado_em", { ascending: false });
 
   if(error){
     alert("Erro ao carregar usuários");
