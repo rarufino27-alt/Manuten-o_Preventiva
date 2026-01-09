@@ -42,11 +42,12 @@ body{
   font-size:1.6rem;
   font-weight:900;
   letter-spacing:2px;
+  color:#000;
 }
 
 .logo span{
   font-size:.8rem;
-  color:#555;
+  color:#000;
 }
 
 input{
@@ -55,6 +56,7 @@ input{
   border-radius:16px;
   border:1px solid #ccc;
   font-size:1rem;
+  color:#000;
 }
 
 button{
@@ -65,6 +67,7 @@ button{
   font-size:1rem;
   font-weight:800;
   cursor:pointer;
+  color:#000;
 }
 
 .error{
@@ -102,11 +105,19 @@ button{
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL (PADRÃO ÚNICO) -->
+<!-- SUPABASE GLOBAL (PADRÃO ÚNICO DO APP) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
+const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
+
+/* 🔁 Auto redirect se já estiver logado */
+const usuarioLogado = JSON.parse(localStorage.getItem("usuarioRF"));
+if(usuarioLogado && usuarioLogado.tipo === "passageiro"){
+  window.location.href = "dashboard-passageiro.html";
+}
+
 const telefoneInput = document.getElementById("telefone");
 const erro = document.getElementById("erro");
 
@@ -131,6 +142,7 @@ document.getElementById("btnEntrar").onclick = async () => {
     .eq("telefone", telefone)
     .eq("tipo", "passageiro")
     .eq("ativo", true)
+    .eq("grupo_id", GRUPO_ID)
     .single();
 
   if(error || !data){
