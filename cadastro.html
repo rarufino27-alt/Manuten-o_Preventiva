@@ -26,6 +26,7 @@ body{
 h1{
   text-align:center;
   margin-bottom:18px;
+  color:#000;
 }
 
 input{
@@ -55,7 +56,7 @@ button:active{
 
 .info{
   font-size:.75rem;
-  color:#666;
+  color:#555;
   text-align:center;
   margin-top:10px;
 }
@@ -91,55 +92,53 @@ button:active{
   </div>
 </div>
 
-<!-- SUPABASE GLOBAL -->
+<!-- SUPABASE (PADRÃO ÚNICO DO PROJETO) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/supabase.js"></script>
 
 <script>
-/* ================= CONFIG ================= */
+/* ================= CONFIG FIXA ================= */
 
-// ID FIXO DO GRUPO RF DRIVER
+// GRUPO RF DRIVER (BASE)
 const GRUPO_ID = "f5b2eec4-f957-4648-8e4e-f5642159dd8c";
 
 /* ================= ELEMENTOS ================= */
 
 const nomeInput = document.getElementById("nome");
-const telInput = document.getElementById("telefone");
+const telefoneInput = document.getElementById("telefone");
 const btn = document.getElementById("btnCadastrar");
 
 /* ================= MÁSCARA TELEFONE ================= */
 
-telInput.addEventListener("input", () => {
-  let v = telInput.value.replace(/\D/g,"").slice(0,11);
+telefoneInput.addEventListener("input", () => {
+  let v = telefoneInput.value.replace(/\D/g,"").slice(0,11);
 
-  if(v.length > 10){
+  if(v.length >= 11){
     v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-  }else if(v.length > 6){
+  } else if(v.length >= 7){
     v = v.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
-  }else if(v.length > 2){
+  } else if(v.length >= 3){
     v = v.replace(/^(\d{2})(\d+)/, "($1) $2");
   }
 
-  telInput.value = v;
+  telefoneInput.value = v;
 });
-
-/* ================= EVENTO ================= */
-
-btn.addEventListener("click", cadastrar);
 
 /* ================= CADASTRO ================= */
 
+btn.addEventListener("click", cadastrar);
+
 async function cadastrar(){
   const nome = nomeInput.value.trim();
-  const telefone = telInput.value.replace(/\D/g,"");
+  const telefone = telefoneInput.value.replace(/\D/g,"");
 
   if(!nome || telefone.length < 10){
     alert("Preencha corretamente nome e telefone");
     return;
   }
 
-  /* 🔎 Verifica se telefone já existe no grupo */
-  const { data: existente, error: selectError } = await supabaseClient
+  /* 🔍 VERIFICA SE JÁ EXISTE */
+  const { data: existente, error: erroBusca } = await supabaseClient
     .from("usuarios")
     .select("id")
     .eq("telefone", telefone)
@@ -147,9 +146,9 @@ async function cadastrar(){
     .eq("grupo_id", GRUPO_ID)
     .maybeSingle();
 
-  if(selectError){
+  if(erroBusca){
+    console.error("Erro busca:", erroBusca);
     alert("Erro ao verificar cadastro");
-    console.error(selectError);
     return;
   }
 
@@ -159,7 +158,7 @@ async function cadastrar(){
     return;
   }
 
-  /* ✅ OBJETO CORRETO (COM GRUPO_ID) */
+  /* ✅ OBJETO FINAL CORRETO */
   const novoUsuario = {
     tipo: "passageiro",
     nome: nome,
@@ -168,13 +167,13 @@ async function cadastrar(){
     grupo_id: GRUPO_ID
   };
 
-  const { error: insertError } = await supabaseClient
+  const { error: erroInsert } = await supabaseClient
     .from("usuarios")
     .insert(novoUsuario);
 
-  if(insertError){
+  if(erroInsert){
+    console.error("Erro insert:", erroInsert);
     alert("Erro ao salvar cadastro");
-    console.error(insertError);
     return;
   }
 
